@@ -60,4 +60,12 @@ public class JwtService
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
+    public List<String> extractAuthorities(String token) {
+        Object claim = parse(token).get("authorities");
+        if (claim instanceof List<?> list) {
+            return list.stream().map(Object::toString).toList();
+        }
+        return List.of();
+    }
 }

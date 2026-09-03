@@ -1,4 +1,4 @@
-package com.mini_erp.backend.auth;
+package com.mini_erp.backend.auth.service;
 
 import com.mini_erp.backend.auth.domain.Role;
 import com.mini_erp.backend.auth.domain.User;

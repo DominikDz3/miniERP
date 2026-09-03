@@ -1,7 +1,8 @@
-package com.mini_erp.backend.auth;
+package com.mini_erp.backend.auth.web;
 
-import com.mini_erp.backend.auth.dto.LoginResponse;
-import com.mini_erp.backend.auth.dto.LoginRequest;
+import com.mini_erp.backend.auth.service.JwtService;
+import com.mini_erp.backend.auth.web.dto.LoginResponse;
+import com.mini_erp.backend.auth.web.dto.LoginRequest;
 import jakarta.validation.Valid;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.userdetails.UserDetails;

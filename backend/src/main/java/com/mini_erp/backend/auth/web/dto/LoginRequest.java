@@ -1,4 +1,4 @@
-package com.mini_erp.backend.auth.dto;
+package com.mini_erp.backend.auth.web.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
