@@ -1,4 +1,4 @@
-package com.mini_erp.backend.auth;
+package com.mini_erp.backend.auth.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
