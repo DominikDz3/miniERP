@@ -1,18 +1,35 @@
 spring:
+    application:
+        name: minierp
+
+    profiles:
+        active: dev
+
     datasource:
         url: ${DB_URL:jdbc:postgresql://localhost:5432/minierp}
-        username: ${DB_USER:minierp}
-        password: ${DB_PASSWORD:minierp}
+        username: ${DB_USER:user}
+        password: ${DB_PASSWORD:password}
+
     jpa:
         hibernate:
             ddl-auto: validate
         open-in-view: false
         properties:
-             hibernate:
-                 format_sql: true
+            hibernate:
+                format_sql: true
+
     flyway:
         enabled: true
-        locations: classpath:db.migration
+        locations: classpath:db/migration
+app:
+    admin:
+        username: ${ADMIN_USERNAME:admin}
+        password: ${ADMIN_PASSWORD:admin123}
+        full-name: ${ADMIN_FULLNAME:Administrator}
+    jwt:
+        secret: ${JWT_SECRET:ZmFrZS1kZXYtc2VjcmV0LWNoYW5nZS1tZS1taW4tMzItYnl0ZXMtbG9uZw==}
+        expiration-ms: 3600000 # 1h
+
 springdoc:
     swagger-ui:
         path: /swagger-ui.html
@@ -20,3 +37,4 @@ springdoc:
 logging:
     level:
         org.hibernate.SQL: debug
+        org.flywaydb: debug
