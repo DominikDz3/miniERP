@@ -88,7 +88,7 @@ public class ProductService {
 
     private Category findCategoryOrThrow(Long id) {
         return categories.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono kategorii" + id));
+                .orElseThrow(() -> new NotFoundException("Nie znaleziono kategorii" + id));
     }
 
     private void apply(Product p, ProductRequest req, Category category) {
