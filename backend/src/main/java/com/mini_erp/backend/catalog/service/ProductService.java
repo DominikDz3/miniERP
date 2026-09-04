@@ -2,8 +2,10 @@ package com.mini_erp.backend.catalog.service;
 
 import com.mini_erp.backend.catalog.domain.Category;
 import com.mini_erp.backend.catalog.domain.Product;
+import com.mini_erp.backend.catalog.repository.PriceHistoryRepository;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.catalog.repository.CategoryRepository;
+import com.mini_erp.backend.catalog.web.dto.PriceHistoryResponse;
 import com.mini_erp.backend.catalog.web.dto.ProductRequest;
 import com.mini_erp.backend.catalog.web.dto.ProductResponse;
 import com.mini_erp.backend.shared.exception.NotFoundException;
@@ -17,16 +19,31 @@ public class ProductService {
 
     private final ProductRepository products;
     private final CategoryRepository categories;
+    private final PriceHistoryRepository priceHistory;
 
-    public ProductService(ProductRepository products, CategoryRepository categories) {
+    public ProductService(ProductRepository products, CategoryRepository categories, PriceHistoryRepository priceHistory) {
         this.products = products;
         this.categories = categories;
+        this.priceHistory = priceHistory;
     }
 
     @Transactional(readOnly = true)
     public Page<ProductResponse> list(String search, Boolean active, Long categoryId, Pageable pageable) {
         String normalized = (search == null || search.isBlank()) ? null : search.trim();
         return products.search(normalized, active, categoryId, pageable).map(this::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PriceHistoryResponse> priceHistory(Long productId, Pageable pageable) {
+        if (!products.existsById(productId)) {
+            throw new NotFoundException("Nie znaleziono produktu: " + productId);
+        }
+        return priceHistory.findByProductIdOrderByChangedAtDesc(productId, pageable)
+                .map(h -> new PriceHistoryResponse(
+                        h.getId(),
+                        h.getOldPurchasePrice(), h.getNewPurchasePrice(),
+                        h.getOldSalePrice(), h.getNewSalePrice(),
+                        h.getChangedAt()));
     }
 
     @Transactional(readOnly = true)

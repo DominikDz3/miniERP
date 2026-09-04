@@ -39,21 +39,21 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse update(Long id, CategoryRequest req) {
-        Category c = findOrThrow(id);
+        Category c = findCategoryOrThrow(id);
         c.setName(req.name());
         return toResponse(categories.save(c));
     }
 
     @Transactional
     public void deactivate(Long id) {
-        Category c = findOrThrow(id);
+        Category c = findCategoryOrThrow(id);
         c.setActive(false);
         categories.save(c);
     }
 
     // helpers
 
-    public Category findOrThrow(Long id) {
+    public Category findCategoryOrThrow(Long id) {
         Category c = categories.findById(id)
                 .orElseThrow(() -> new NotFoundException("Nie znaleziono kategorii: " + id));
         if(!c.isActive()) {

@@ -1,6 +1,7 @@
 package com.mini_erp.backend.catalog.web;
 
 import com.mini_erp.backend.catalog.service.ProductService;
+import com.mini_erp.backend.catalog.web.dto.PriceHistoryResponse;
 import com.mini_erp.backend.catalog.web.dto.ProductRequest;
 import com.mini_erp.backend.catalog.web.dto.ProductResponse;
 import jakarta.validation.Valid;
@@ -35,6 +36,12 @@ public class ProductController {
     @PreAuthorize("hasAuthority('PRODUCT_READ')")
     public ProductResponse get(@PathVariable Long id) {
         return productService.get(id);
+    }
+
+    @GetMapping("/{id}/price-history")
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
+    public Page<PriceHistoryResponse> priceHistory(@PathVariable Long id, @ParameterObject Pageable pageable) {
+        return productService.priceHistory(id, pageable);
     }
 
     @PostMapping
