@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "price_history")
@@ -30,5 +31,5 @@ public class PriceHistory {
     private BigDecimal newSalePrice;
 
     @Column(name = "changed_at", insertable = false, updatable = false)
-    private Instant changedAt;
+    private LocalDateTime changedAt;
 }

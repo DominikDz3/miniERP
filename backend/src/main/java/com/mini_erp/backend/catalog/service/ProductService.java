@@ -100,6 +100,7 @@ public class ProductService {
         p.setSalePrice(req.salePrice());
         p.setVatRate(req.vatRate());
         p.setUnit(req.unit());
+        p.setStock(req.stock());
         p.setMinStock(req.minStock());
     }
 
@@ -116,6 +117,7 @@ public class ProductService {
          p.getVatRate(),
          p.getUnit(),
          p.getMinStock(),
+         p.getStock(),
          p.isActive()
         );
     }

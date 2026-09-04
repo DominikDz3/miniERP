@@ -45,7 +45,7 @@ class ProductServiceTest {
         return new ProductRequest(
                 "SKU-1", "Wiertarka", "opis", 1L,
                 new BigDecimal("100.00"), new BigDecimal("150.00"),
-                new BigDecimal("23.00"), "szt", new BigDecimal("5"));
+                new BigDecimal("23.00"), "szt", 5, 1);
     }
 
     // create

@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "products")
@@ -41,8 +41,11 @@ public class Product {
     @Column(nullable = false, length = 20)
     private String unit;
 
-    @Column(name = "min_stock", nullable = false, precision = 19, scale = 3)
-    private BigDecimal minStock = BigDecimal.ZERO;
+    @Column(nullable = false)
+    private Integer stock = 0;
+
+    @Column(name = "min_stock", nullable = false)
+    private Integer minStock = 0;
 
     @Column(nullable = false)
     private boolean active = true;
@@ -51,5 +54,5 @@ public class Product {
     private Long version;
 
     @Column(name = "created_at", insertable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 }

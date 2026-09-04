@@ -13,7 +13,8 @@ public record ProductResponse(
         BigDecimal salePrice,
         BigDecimal vatRate,
         String unit,
-        BigDecimal minStock,
+        Integer stock,
+        Integer minStock,
         boolean active
 ) {
 }

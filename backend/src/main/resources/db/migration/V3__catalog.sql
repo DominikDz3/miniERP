@@ -6,7 +6,7 @@ create table categories (
 
 create table products (
     id              bigint generated always as identity primary key,
-    sku             varchar(64)   not null unique,  -- product code
+    sku             varchar(64)   not null,  -- product code
     name            varchar(200)  not null,
     description     text,
     category_id     bigint        not null references categories(id),
@@ -14,10 +14,11 @@ create table products (
     sale_price      numeric(19,4) not null,
     vat_rate        numeric(5,2)  not null,
     unit            varchar(20)   not null,
-    min_stock       numeric(19,3) not null default 0,
+    min_stock       integer       not null default 0,
+    stock           integer       not null default 0,
     active          boolean       not null default true,
     version         bigint        not null default 0,
-    created_at      timestamptz   not null default now()
+    created_at      timestamp     not null default now()
 );
 
 create index idx_products_category_id on products(category_id);

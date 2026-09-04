@@ -1,7 +1,7 @@
 package com.mini_erp.backend.catalog.web.dto;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record PriceHistoryResponse(
         Long id,
@@ -9,5 +9,5 @@ public record PriceHistoryResponse(
         BigDecimal newPurchasePrice,
         BigDecimal oldSalePrice,
         BigDecimal newSalePrice,
-        Instant changedAt
+        LocalDateTime changedAt
 ) {}

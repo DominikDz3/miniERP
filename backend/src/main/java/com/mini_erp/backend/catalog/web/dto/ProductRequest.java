@@ -13,5 +13,6 @@ public record ProductRequest (
         @NotNull @PositiveOrZero BigDecimal salePrice,
         @NotNull @PositiveOrZero BigDecimal vatRate,
         @NotBlank @Size(max = 20) String unit,
-        @NotNull @PositiveOrZero BigDecimal minStock
+        @NotNull @PositiveOrZero Integer stock,
+        @NotNull @PositiveOrZero Integer minStock
 ) { }
