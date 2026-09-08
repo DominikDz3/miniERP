@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "customers")
@@ -33,21 +31,9 @@ public class Customer {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("id")
-    private List<PayerAddress> payerAddresses = new ArrayList<>();
+    @Column(name = "default_payer_id")
+    private Long defaultPayerId;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("id")
-    private List<ReceiverAddress> receiverAddresses = new ArrayList<>();
-
-    public void addPayer(PayerAddress a) {
-        a.setCustomer(this);
-        payerAddresses.add(a);
-    }
-
-    public void addReceiver(ReceiverAddress a) {
-        a.setCustomer(this);
-        receiverAddresses.add(a);
-    }
+    @Column(name = "default_receiver_id")
+    private Long defaultReceiverId;
 }

@@ -8,6 +8,5 @@ public record AddressRequest(
         @NotBlank @Size(max = 100) String city,
         @NotBlank @Size(max = 10)  String postalCode,
         @Size(max = 60) String country,
-        @Size(max = 30) String phone,
-        boolean isDefault
+        @Size(max = 30) String phone
 ) {}

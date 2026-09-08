@@ -14,12 +14,8 @@ public class PayerAddress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
-
-    @Column(name = "is_default", nullable = false)
-    private boolean isDefault = false;
+    @Column(name = "customer_id", nullable = false)
+    private Long customerId;
 
     @Column(nullable = false, length = 200)
     private String street;
@@ -31,5 +27,5 @@ public class PayerAddress {
     private String postalCode;
 
     @Column(nullable = false, length = 60)
-    private String country = "Polska";
+    private String country;
 }
