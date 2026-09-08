@@ -16,26 +16,41 @@ import java.util.List;
 public class JwtService
 {
     private final SecretKey key;
-    private final long expirationMs;
+    private final long accessMs;
+    private final long refreshMs;
 
     public JwtService(@Value("${app.jwt.secret}") String secret,
-                      @Value("${app.jwt.expiration-ms}") long expirationMs) {
+                      @Value("${app.jwt.access-ms}") long accessMs,
+                      @Value("${app.jwt.refresh-ms}") long refreshMs
+                      ) {
 
         this.key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
-        this.expirationMs = expirationMs;
+        this.accessMs = accessMs;
+        this.refreshMs = refreshMs;
     }
 
     public String generateToken(UserDetails user) {
         List<String> authorities = user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
-
         Date now = new Date();
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claim("authorities", authorities)
+                .claim("type", "access")
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + expirationMs))
+                .expiration(new Date(now.getTime() + accessMs))
+                .signWith(key)
+                .compact();
+    }
+
+    public String generateRefreshToken(UserDetails user) {
+        Date now = new Date();
+        return Jwts.builder()
+                .subject(user.getUsername())
+                .claim("type", "refresh")
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + refreshMs))
                 .signWith(key)
                 .compact();
     }
@@ -48,6 +63,14 @@ public class JwtService
         try {
             parse(token);
             return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean isRefreshToken(String token) {
+        try {
+            return "refresh".equals(parse(token).get("type", String.class));
         } catch (Exception e) {
             return false;
         }

@@ -28,7 +28,8 @@ app:
         full-name: ${ADMIN_FULLNAME:Administrator}
     jwt:
         secret: ${JWT_SECRET:ZmFrZS1kZXYtc2VjcmV0LWNoYW5nZS1tZS1taW4tMzItYnl0ZXMtbG9uZw==}
-        expiration-ms: 3600000 # 1h
+        access-ms: 900000       # 15 min
+        refresh-ms: 604800000   # 7 dni
 
 springdoc:
     swagger-ui:
