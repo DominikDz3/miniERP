@@ -3,11 +3,15 @@ package com.mini_erp.backend.customer.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "customers")
-@Getter @Setter
+@Getter
+@Setter
 public class Customer {
 
     @Id
@@ -20,27 +24,30 @@ public class Customer {
     @Column(length = 15)
     private String nip;
 
-    @Column(nullable = false, length = 200)
-    private String street;
-
-    @Column(nullable = false, length = 100)
-    private String city;
-
-    @Column(name = "postal_code", nullable = false, length = 10)
-    private String postalCode;
-
-    @Column(nullable = false, length = 60)
-    private String country = "Polska";
-
     @Column(nullable = false, length = 150)
     private String email;
-
-    @Column(nullable = false, length = 30)
-    private String phone;
 
     @Column(nullable = false)
     private boolean active = true;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id")
+    private List<PayerAddress> payerAddresses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id")
+    private List<ReceiverAddress> receiverAddresses = new ArrayList<>();
+
+    public void addPayer(PayerAddress a) {
+        a.setCustomer(this);
+        payerAddresses.add(a);
+    }
+
+    public void addReceiver(ReceiverAddress a) {
+        a.setCustomer(this);
+        receiverAddresses.add(a);
+    }
 }
