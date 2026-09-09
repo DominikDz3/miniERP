@@ -1,11 +1,10 @@
-import { createContext, useContext, useEffect, useState} from 'react';
+import { createContext, useContext, useState} from 'react';
 import type { ReactNode } from 'react';
 import { apiFetch } from '../lib/apiClient';
-import { setToken, getAuthorities, getUsername } from '../lib/auth';
+import { getToken, setToken, isTokenValid, getAuthorities, getUsername } from '../lib/auth';
 
 interface AuthState {
     isAuthenticated: boolean;
-    loading: boolean;
     username: string | null;
     authorities: string[];
     hasAuthority: (a: string) => boolean;
@@ -17,31 +16,22 @@ const AuthContext = createContext<AuthState | null>(null);
 interface LoginResponse { token: string; }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [token, setTokenState] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [token, setTokenState] = useState<string | null>(() => {
+        const t = getToken();
+        return isTokenValid(t) ? t : null;
+    });
 
-    useEffect(() => {
-        (async () => {
-        try {
-            const res = await apiFetch<LoginResponse>('/auth/refresh', { method: 'POST' });
-            setToken(res.token);
-            setTokenState(res.token);
-        } catch {
-            setToken(null);
-            setTokenState(null);
-        } finally {
-            setLoading(false);
-        }
-    })();
-    }, []);
+    const applyToken = (t: string | null) => {
+        setToken(t);       
+        setTokenState(t);   
+    };
 
     const login = async (username: string, password: string) => {
         const res = await apiFetch<LoginResponse>('/auth/login', {
             method: 'POST',
             body: JSON.stringify({ username, password }),
         });
-        setToken(res.token);
-        setTokenState(res.token);
+        applyToken(res.token);
     };
 
     const logout = async () => {
@@ -54,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const value: AuthState = {
         isAuthenticated: !!token,
-        loading,
         username: token ? getUsername(token) : null,
         authorities,
         hasAuthority: (a) => authorities.includes(a),

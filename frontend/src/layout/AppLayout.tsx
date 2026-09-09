@@ -19,14 +19,14 @@ const NAV: NavItem[] = [
 ];
 
 export function AppLayout() {
-    const { username, authorities, logout } = useAuth();
+    const { username, authorities, logout} = useAuth();
     const visible = NAV.filter((n) => authorities.includes(n.authority));
 
     return (
     <div className="min-h-screen flex">
       <aside className="w-56 bg-gray-800 text-gray-100 flex flex-col">
         <div className="p-4 text-lg font-semibold border-b border-gray-700">MiniERP</div>
-        <nav className="flex-1 p-2 space-y-1">
+         <nav className="flex-1 p-2 space-y-1">
           {visible.map((n) => (
             <NavLink
               key={n.path}
