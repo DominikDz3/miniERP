@@ -37,20 +37,27 @@ public class AdminBootstrap implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        // configurable admin from env/config
+        createIfMissing(username, password, fullName, "ADMIN");
+
+        // seed accounts for testing role-based access on the frontend
+        createIfMissing("manager", "manager123", "Manager Testowy", "MANAGER");
+        createIfMissing("user", "user123", "User Testowy", "USER");
+    }
+
+    private void createIfMissing(String username, String rawPassword, String fullName, String roleName) {
         if (users.existsByUsername(username)) return;
 
-        Role adminRole = roles.findByName("ADMIN")
-                .orElseThrow(() -> new IllegalStateException("Brak roli ADMIN"));
+        Role role = roles.findByName(roleName)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Brak roli " + roleName));
 
-        User admin = new User();
-        admin.setUsername(username);
-        admin.setPassword(encoder.encode(password));
-        admin.setFull_name(fullName);
-        admin.setEnabled(true);
-        admin.setRole(adminRole);
-        users.save(admin);
-
-
-
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(encoder.encode(rawPassword));
+        user.setFull_name(fullName);
+        user.setEnabled(true);
+        user.setRole(role);
+        users.save(user);
     }
 }
