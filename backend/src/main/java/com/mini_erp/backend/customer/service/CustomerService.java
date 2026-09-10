@@ -81,6 +81,13 @@ public class CustomerService {
     }
 
     @Transactional
+    public void activate(Long id) {
+        Customer c = findOrThrow(id);
+        c.setActive(true);
+        customers.save(c);
+    }
+
+    @Transactional
     public void deactivate(Long id) {
         Customer c = findOrThrow(id);
         c.setActive(false);
