@@ -65,9 +65,12 @@ public class CustomerController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('CLIENT_WRITE')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deactivate(@PathVariable Long id) {
-        customerService.deactivate(id);
-    }
+    public void deactivate(@PathVariable Long id) { customerService.deactivate(id); }
+
+    @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasAuthority('CLIENT_WRITE')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void activate(@PathVariable Long id) { customerService.activate(id); }
 
     // payer addresses
 

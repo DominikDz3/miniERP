@@ -1,10 +1,10 @@
 import {useState} from 'react';
 import type { SubmitEvent } from 'react';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
-import { ApiError } from '../lib/apiClient';
+import { ApiError } from '@/shared/services/apiClient';
 
-export function LoginPage() {
+export function LoginView() {
     const { login } = useAuth();
     const navigate = useNavigate();
     const [username, setUsername] = useState("");

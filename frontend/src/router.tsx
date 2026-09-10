@@ -1,15 +1,21 @@
 import { createBrowserRouter } from "react-router";
-import { AppLayout } from "./layout/AppLayout";
-import { ProtectedRoute } from "./auth/ProtectedRoute";
-import { LoginPage } from "./pages/LoginPage";
+import { AppLayout } from "./core/layouts/AppLayout";
+import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
+import { CustomersView } from "./features/customers/views/CustomersView"
+import { CustomerDetailsView } from "./features/customers/views/CustomerDetailsView"
 
 import {
-    DashboardPage, CustomersPage, SuppliersPage, ProductsPage,
+    DashboardPage, SuppliersPage, ProductsPage,
     WarehousePage, SalesPage, PurchasesPage, ReportsPage, AuditPage, ForbiddenPage,
 } from "./pages/modules/Placeholders";
+import { authRoutes } from "./features/auth/routes";
+import { customerRoutes } from "./features/customers/routes";
 
 export const router = createBrowserRouter([
-    { path: "/login", element: <LoginPage /> },
+    // public
+    ...authRoutes,
+
+    // authenticated
     {
         element: <ProtectedRoute />,
         children: [
@@ -18,10 +24,19 @@ export const router = createBrowserRouter([
                 children: [
                     { path: "/", element: <DashboardPage /> },
                     { path: "/403", element: <ForbiddenPage /> },
+
+                    // feature routes
+                    ...customerRoutes,
+
+                    // placeholders - for now
+
                     { 
                         element: <ProtectedRoute requiredAuthority="CLIENT_READ" />,
-                        children: [{ path: "/customers", element: <CustomersPage /> }],
-                    },
+                        children: [
+                            { path: "/customers", element: <CustomersView /> },
+                            { path: "/customers/:id", element: <CustomerDetailsView/>}
+                        ]
+                    },  
                     {
                         element: <ProtectedRoute requiredAuthority="SUPPLIER_READ" />,
                         children: [{ path: "/suppliers", element: <SuppliersPage /> }],

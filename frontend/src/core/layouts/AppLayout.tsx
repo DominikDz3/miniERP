@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '@/features/auth/context/AuthContext';
 
 interface NavItem { 
     path: string; 
@@ -23,7 +23,7 @@ export function AppLayout() {
     const visible = NAV.filter((n) => authorities.includes(n.authority));
 
     return (
-    <div className="min-h-screen flex">
+    <div className="flex h-screen overflow-hidden">
       <aside className="w-56 bg-gray-800 text-gray-100 flex flex-col">
         <div className="p-4 text-lg font-semibold border-b border-gray-700">MiniERP</div>
          <nav className="flex-1 p-2 space-y-1">
@@ -44,7 +44,7 @@ export function AppLayout() {
           <button onClick={logout} className="text-red-300 hover:text-red-200">Wyloguj</button>
         </div>
       </aside>
-      <main className="flex-1 p-6 bg-gray-50">
+      <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
         <Outlet />
       </main>
     </div>

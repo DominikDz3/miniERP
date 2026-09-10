@@ -53,7 +53,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}, retry
 
     if (!res.ok) {
         let detail = res.statusText;
-        try { detail = (await res.json()).detail; } catch {}
+        try { detail = (await res.json()).detail ?? detail; } catch {}
         throw new ApiError(res.status, detail);
     }
 
