@@ -2,9 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from "react-router"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { AuthProvider } from './auth/AuthContext.tsx'
+import { AuthProvider } from './features/auth/context/AuthContext.tsx'
 import { router } from "./router.tsx"
-import './index.css'
+import './core/assets/css/index.css'
 
 const queryClient = new QueryClient();
 

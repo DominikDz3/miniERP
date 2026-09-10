@@ -1,7 +1,7 @@
 import { createContext, useContext, useState} from 'react';
 import type { ReactNode } from 'react';
-import { apiFetch } from '../lib/apiClient';
-import { getToken, setToken, isTokenValid, getAuthorities, getUsername } from '../lib/auth';
+import { apiFetch } from '@/shared/services/apiClient';
+import { getToken, setToken, isTokenValid, getAuthorities, getUsername } from '@/shared/services/auth';
 
 interface AuthState {
     isAuthenticated: boolean;
