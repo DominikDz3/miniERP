@@ -1,0 +1,16 @@
+create table suppliers (
+id              bigint generated always as identity primary key,
+name            varchar(200) not null,
+nip             varchar(15)  not null,
+phone           varchar(30)  not null,
+email           varchar(150) not null,
+street          varchar(200) not null,
+city            varchar(100) not null,
+postal_code     varchar(10)    not null,
+country         varchar(60)  not null,
+active          boolean      not null default true,
+created_at      timestamp    not null default now()
+);
+
+create index idx_suppliers_name on suppliers (name);
+create unique index uq_suppliers_nip on suppliers (nip) where nip is not null;
