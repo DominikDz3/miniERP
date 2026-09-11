@@ -8,20 +8,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
 
 @RestController
 @RequestMapping("/api/suppliers")
 public class SupplierController {
 
-    private final SupplierService service;
+    private final SupplierService supplierService;
 
-    public SupplierController(SupplierService service) {
-        this.service = service;
+    public SupplierController(SupplierService supplierService) {
+        this.supplierService = supplierService;
     }
 
     @GetMapping
@@ -30,32 +27,26 @@ public class SupplierController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean active,
             @ParameterObject @PageableDefault(size = 20) Pageable pageable) {
-        return service.list(search, active, pageable);
+        return supplierService.list(search, active, pageable);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('SUPPLIER_READ')")
-    public SupplierResponse get(@PathVariable Long id) {
-        return service.get(id);
-    }
+    public SupplierResponse get(@PathVariable Long id) { return supplierService.get(id); }
 
     @PostMapping
     @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
-    public ResponseEntity<SupplierResponse> create(@Valid @RequestBody SupplierRequest req) {
-        SupplierResponse created = service.create(req);
-        return ResponseEntity.created(URI.create("/api/suppliers/" + created.id())).body(created);
-    }
+    @ResponseStatus(HttpStatus.CREATED)
+    public SupplierResponse create(@Valid @RequestBody SupplierRequest req) { return supplierService.create(req); }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     public SupplierResponse update(@PathVariable Long id, @Valid @RequestBody SupplierRequest req) {
-        return service.update(id, req);
+        return supplierService.update(id, req);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deactivate(@PathVariable Long id) {
-        service.deactivate(id);
-    }
+    public void deactivate(@PathVariable Long id) { supplierService.deactivate(id); }
 }
