@@ -1,15 +1,14 @@
 import { createBrowserRouter } from "react-router";
 import { AppLayout } from "./core/layouts/AppLayout";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
-import { CustomersView } from "./features/customers/views/CustomersView"
-import { CustomerDetailsView } from "./features/customers/views/CustomerDetailsView"
 
 import {
-    DashboardPage, SuppliersPage, ProductsPage,
+    DashboardPage, SuppliersPage,
     WarehousePage, SalesPage, PurchasesPage, ReportsPage, AuditPage, ForbiddenPage,
 } from "./pages/modules/Placeholders";
 import { authRoutes } from "./features/auth/routes";
 import { customerRoutes } from "./features/customers/routes";
+import { productRoutes } from "./features/products/route";
 
 export const router = createBrowserRouter([
     // public
@@ -27,23 +26,13 @@ export const router = createBrowserRouter([
 
                     // feature routes
                     ...customerRoutes,
+                    ...productRoutes,
 
                     // placeholders - for now
 
-                    { 
-                        element: <ProtectedRoute requiredAuthority="CLIENT_READ" />,
-                        children: [
-                            { path: "/customers", element: <CustomersView /> },
-                            { path: "/customers/:id", element: <CustomerDetailsView/>}
-                        ]
-                    },  
                     {
                         element: <ProtectedRoute requiredAuthority="SUPPLIER_READ" />,
                         children: [{ path: "/suppliers", element: <SuppliersPage /> }],
-                    },
-                    {
-                        element: <ProtectedRoute requiredAuthority="PRODUCT_READ" />,
-                        children: [{ path: "/products", element: <ProductsPage /> }],
                     },
                     {
                         element: <ProtectedRoute requiredAuthority="WAREHOUSE_READ" />,

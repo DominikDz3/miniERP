@@ -26,7 +26,7 @@ public class ProductController {
     @PreAuthorize("hasAuthority('PRODUCT_READ')")
     public Page<ProductResponse> list(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false, defaultValue = "true") Boolean active,
+            @RequestParam(required = false) Boolean active,
             @RequestParam(required = false) Long categoryId,
             @ParameterObject Pageable pageable) {
         return productService.list(search, active, categoryId, pageable);
@@ -55,6 +55,13 @@ public class ProductController {
     @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
         return productService.update(id, request);
+    }
+
+    @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void activate(@PathVariable Long id) {
+        productService.activate(id);
     }
 
     @DeleteMapping("/{id}")

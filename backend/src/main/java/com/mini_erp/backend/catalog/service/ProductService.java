@@ -73,6 +73,13 @@ public class ProductService {
     }
 
     @Transactional
+    public void activate(Long id) {
+        Product p = findOrThrow(id);
+        p.setActive(true);
+        products.save(p);
+    }
+
+    @Transactional
     public void deactivate(Long id) {
         Product p = findOrThrow(id);
         p.setActive(false);
@@ -116,8 +123,8 @@ public class ProductService {
          p.getSalePrice(),
          p.getVatRate(),
          p.getUnit(),
-         p.getMinStock(),
          p.getStock(),
+         p.getMinStock(),
          p.isActive()
         );
     }
