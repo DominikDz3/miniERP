@@ -19,6 +19,7 @@ public class GlobalExceptionHandler {
     }
 
     // 409 - conflict, doubled SKU/Name
+    @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleConflict(IllegalArgumentException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
