@@ -1,9 +1,7 @@
 package com.mini_erp.backend.catalog.web;
 
 import com.mini_erp.backend.catalog.service.ProductService;
-import com.mini_erp.backend.catalog.web.dto.PriceHistoryResponse;
-import com.mini_erp.backend.catalog.web.dto.ProductRequest;
-import com.mini_erp.backend.catalog.web.dto.ProductResponse;
+import com.mini_erp.backend.catalog.web.dto.*;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -55,6 +53,24 @@ public class ProductController {
     @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
         return productService.update(id, request);
+    }
+
+    @PostMapping("/{id}/receive")
+    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    public ProductResponse receive(@PathVariable Long id, @Valid @RequestBody StockOperationRequest request) {
+        return productService.receive(id, request.quantity());
+    }
+
+    @PostMapping("/{id}/issue")
+    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    public ProductResponse issue(@PathVariable Long id, @Valid @RequestBody StockOperationRequest request) {
+        return productService.issue(id, request.quantity());
+    }
+
+    @PostMapping("/{id}/transfer")
+    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    public ProductResponse transfer(@PathVariable Long id, @Valid @RequestBody TransferRequest request) {
+        return productService.transfer(id, request.quantity(), request.targetWarehouseId());
     }
 
     @PatchMapping("/{id}/activate")

@@ -4,6 +4,8 @@ import com.mini_erp.backend.catalog.domain.Category;
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.repository.CategoryRepository;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
+import com.mini_erp.backend.warehouse.domain.Warehouse;
+import com.mini_erp.backend.warehouse.repository.WarehouseRepository;
 import net.datafaker.Faker;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -18,7 +20,7 @@ import java.util.Locale;
 
 @Component
 @Profile("dev")
-@Order(3)
+@Order(4)
 public class CatalogSeeder implements ApplicationRunner {
 
     private static final int COUNT = 50;
@@ -28,10 +30,12 @@ public class CatalogSeeder implements ApplicationRunner {
 
     private final ProductRepository products;
     private final CategoryRepository categories;
+    private final WarehouseRepository warehouses;
 
-    public CatalogSeeder(ProductRepository products, CategoryRepository categories) {
+    public CatalogSeeder(ProductRepository products, CategoryRepository categories, WarehouseRepository warehouses) {
         this.products = products;
         this.categories = categories;
+        this.warehouses = warehouses;
     }
 
     @Override
@@ -50,6 +54,7 @@ public class CatalogSeeder implements ApplicationRunner {
         }
 
         List<Category> allCategories = categories.findAll();
+        List<Warehouse> allWarehouses = warehouses.findAll();
 
         for (int i = 0; i < COUNT; i++) {
             BigDecimal purchasePrice = BigDecimal
@@ -60,6 +65,7 @@ public class CatalogSeeder implements ApplicationRunner {
                     .setScale(2, RoundingMode.HALF_UP);
 
             Category category = allCategories.get(faker.number().numberBetween(0, allCategories.size()));
+            Warehouse warehouse = allWarehouses.get(faker.number().numberBetween(0, allWarehouses.size()));
 
             Product p = new Product();
             p.setSku("SKU-" + String.format("%04d", i + 1));
@@ -73,6 +79,7 @@ public class CatalogSeeder implements ApplicationRunner {
             p.setStock(faker.number().numberBetween(0, 200));
             p.setMinStock(faker.number().numberBetween(0, 20));
             p.setActive(faker.bool().bool());
+            p.setWarehouse(warehouse);
             products.save(p);
         }
     }

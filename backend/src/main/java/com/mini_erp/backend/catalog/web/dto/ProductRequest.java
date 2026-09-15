@@ -9,6 +9,7 @@ public record ProductRequest (
         @NotBlank @Size(max = 200) String name,
         String description,
         @NotNull Long categoryId,
+        @NotNull Long warehouseId,
         @NotNull @PositiveOrZero BigDecimal purchasePrice,
         @NotNull @PositiveOrZero BigDecimal salePrice,
         @NotNull @PositiveOrZero BigDecimal vatRate,

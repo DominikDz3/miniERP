@@ -9,6 +9,8 @@ public record ProductResponse(
         String description,
         Long categoryId,
         String categoryName,
+        Long warehouseId,
+        String warehouseName,
         BigDecimal purchasePrice,
         BigDecimal salePrice,
         BigDecimal vatRate,

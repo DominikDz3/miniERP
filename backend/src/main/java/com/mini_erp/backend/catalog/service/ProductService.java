@@ -9,6 +9,12 @@ import com.mini_erp.backend.catalog.web.dto.PriceHistoryResponse;
 import com.mini_erp.backend.catalog.web.dto.ProductRequest;
 import com.mini_erp.backend.catalog.web.dto.ProductResponse;
 import com.mini_erp.backend.shared.exception.NotFoundException;
+import com.mini_erp.backend.warehouse.domain.StockMovement;
+import com.mini_erp.backend.warehouse.domain.StockMovementType;
+import com.mini_erp.backend.warehouse.domain.Warehouse;
+import com.mini_erp.backend.warehouse.repository.StockMovementRepository;
+import com.mini_erp.backend.warehouse.repository.WarehouseRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
@@ -20,11 +26,19 @@ public class ProductService {
     private final ProductRepository products;
     private final CategoryRepository categories;
     private final PriceHistoryRepository priceHistory;
+    private final WarehouseRepository warehouses;
+    private final StockMovementRepository stockMovements;
 
-    public ProductService(ProductRepository products, CategoryRepository categories, PriceHistoryRepository priceHistory) {
+    public ProductService(ProductRepository products,
+                          CategoryRepository categories,
+                          PriceHistoryRepository priceHistory,
+                          WarehouseRepository warehouses,
+                          StockMovementRepository stockMovements) {
         this.products = products;
         this.categories = categories;
         this.priceHistory = priceHistory;
+        this.warehouses = warehouses;
+        this.stockMovements = stockMovements;
     }
 
     @Transactional(readOnly = true)
@@ -53,14 +67,15 @@ public class ProductService {
 
     @Transactional
     public ProductResponse create(ProductRequest req) {
-        if (products.existsBySku(req.sku())) {
-            throw new IllegalArgumentException("Produkt o takim SKU już istnieje" + req.sku());
+        if (products.existsBySkuAndWarehouseId(req.sku(), req.warehouseId())) {
+            throw new IllegalArgumentException("Produkt o takim SKU już istnieje w tym magazynie: " + req.sku());
         }
 
         Category category = findCategoryOrThrow(req.categoryId());
+        Warehouse warehouse = findWarehouseOrThrow(req.warehouseId());
 
         Product p = new Product();
-        apply(p, req, category);
+        apply(p, req, category, warehouse);
         return toResponse(products.save(p));
     }
 
@@ -68,8 +83,78 @@ public class ProductService {
     public ProductResponse update(Long id, ProductRequest req) {
         Product p = findOrThrow(id);
         Category category = findCategoryOrThrow(req.categoryId());
-        apply(p, req, category);
+        Warehouse warehouse = findWarehouseOrThrow(req.warehouseId());
+        apply(p, req, category, warehouse);
         return toResponse(products.save(p));
+    }
+
+    @Transactional
+    public ProductResponse receive(Long id, int quantity) {
+        Product p = findOrThrow(id);
+        p.setStock(p.getStock() + quantity);
+
+        logMovement(p, StockMovementType.PRZYJECIE, quantity, null);
+        return toResponse(products.save(p));
+    }
+
+    @Transactional
+    public ProductResponse issue(Long id, int quantity) {
+        Product p = findOrThrow(id);
+        int newStock = p.getStock() - quantity;
+
+        if(newStock < 0) {
+            throw new IllegalArgumentException("Za mało towaru: dostępne " + p.getStock() + ", próba wydania " + quantity);
+        }
+        p.setStock(newStock);
+
+        logMovement(p, StockMovementType.WYDANIE, quantity, null);
+        return toResponse(products.save(p));
+    }
+
+    @Transactional
+    public ProductResponse transfer(Long sourceProductId, int quantity, Long targetWarehouseId) {
+        Product source = findOrThrow(sourceProductId);
+        Warehouse targetWarehouse = findWarehouseOrThrow(targetWarehouseId);
+
+        if (source.getWarehouse().getId().equals(targetWarehouseId)) {
+            throw new IllegalArgumentException("Magazyn docelowy jest taki sam jak źródłowy");
+        }
+
+        // take product from source
+        int newSourceStock = source.getStock() - quantity;
+        if(newSourceStock < 0) {
+            throw new IllegalArgumentException("Za mało towaru: dostępne " + source.getStock() + ", próba przesunięcia " + quantity);
+        }
+        source.setStock(newSourceStock);
+        products.save(source);
+
+        // find sku in target warehouse
+        Product target = products.findBySkuAndWarehouseId(source.getSku(), targetWarehouseId)
+                .orElse(null);
+
+        // if target warehouse does not have product, create new
+        if(target == null) {
+            target = new Product();
+            target.setSku(source.getSku());
+            target.setName(source.getName());
+            target.setDescription(source.getDescription());
+            target.setCategory(source.getCategory());
+            target.setWarehouse(targetWarehouse);
+            target.setPurchasePrice(source.getPurchasePrice());
+            target.setSalePrice(source.getSalePrice());
+            target.setVatRate(source.getVatRate());
+            target.setUnit(source.getUnit());
+            target.setMinStock(source.getMinStock());
+            target.setStock(quantity);
+            target.setActive(true);
+        } else {
+            target.setStock(target.getStock() + quantity);
+        }
+        products.save(target);
+
+        logMovement(source, StockMovementType.PRZESUNIECIE, quantity, targetWarehouseId);
+
+        return toResponse(source);
     }
 
     @Transactional
@@ -98,11 +183,28 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException("Nie znaleziono kategorii" + id));
     }
 
-    private void apply(Product p, ProductRequest req, Category category) {
+    private Warehouse findWarehouseOrThrow(Long id) {
+        return warehouses.findById(id)
+                .orElseThrow(() -> new NotFoundException("Nie znaleziono magazynu" + id));
+    }
+
+    private void logMovement(Product p, StockMovementType type, int quantity, Long targetWarehouseId) {
+        StockMovement m = new StockMovement();
+        m.setProductId(p.getId());
+        m.setType(type);
+        m.setQuantity(quantity);
+        m.setWarehouseId(p.getWarehouse().getId());
+        m.setTargetWarehouseId(targetWarehouseId);
+        m.setPerformedBy(currentUsername());
+        stockMovements.save(m);
+    }
+
+    private void apply(Product p, ProductRequest req, Category category, Warehouse warehouse) {
         p.setSku(req.sku());
         p.setName(req.name());
         p.setDescription(req.description());
         p.setCategory(category);
+        p.setWarehouse(warehouse);
         p.setPurchasePrice(req.purchasePrice());
         p.setSalePrice(req.salePrice());
         p.setVatRate(req.vatRate());
@@ -119,6 +221,8 @@ public class ProductService {
          p.getDescription(),
          p.getCategory().getId(),
          p.getCategory().getName(),
+         p.getWarehouse().getId(),
+         p.getWarehouse().getName(),
          p.getPurchasePrice(),
          p.getSalePrice(),
          p.getVatRate(),
@@ -127,5 +231,9 @@ public class ProductService {
          p.getMinStock(),
          p.isActive()
         );
+    }
+
+    private String currentUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }

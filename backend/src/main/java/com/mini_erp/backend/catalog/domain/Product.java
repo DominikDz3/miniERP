@@ -1,5 +1,6 @@
 package com.mini_erp.backend.catalog.domain;
 
+import com.mini_erp.backend.warehouse.domain.Warehouse;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 64)
+    @Column(nullable = false, length = 64)
     private String sku;
 
     @Column(nullable = false, length = 200)
@@ -28,6 +29,10 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
 
     @Column(name = "purchase_price", nullable = false, precision = 19, scale = 4)
     private BigDecimal purchasePrice;
