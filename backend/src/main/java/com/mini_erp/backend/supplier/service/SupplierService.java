@@ -50,6 +50,13 @@ public class SupplierService {
     }
 
     @Transactional
+    public void activate(Long id) {
+        Supplier s = findOrThrow(id);
+        s.setActive(true);
+        suppliers.save(s);
+    }
+
+    @Transactional
     public void deactivate(Long id) {
         findOrThrow(id).setActive(false);
     }

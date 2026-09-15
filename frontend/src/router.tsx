@@ -3,12 +3,13 @@ import { AppLayout } from "./core/layouts/AppLayout";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 
 import {
-    DashboardPage, SuppliersPage,
+    DashboardPage,
     WarehousePage, SalesPage, PurchasesPage, ReportsPage, AuditPage, ForbiddenPage,
 } from "./pages/modules/Placeholders";
 import { authRoutes } from "./features/auth/routes";
 import { customerRoutes } from "./features/customers/routes";
 import { productRoutes } from "./features/products/route";
+import { supplierRoutes } from "./features/suppliers/route";
 
 export const router = createBrowserRouter([
     // public
@@ -27,13 +28,10 @@ export const router = createBrowserRouter([
                     // feature routes
                     ...customerRoutes,
                     ...productRoutes,
+                    ...supplierRoutes,
 
                     // placeholders - for now
 
-                    {
-                        element: <ProtectedRoute requiredAuthority="SUPPLIER_READ" />,
-                        children: [{ path: "/suppliers", element: <SuppliersPage /> }],
-                    },
                     {
                         element: <ProtectedRoute requiredAuthority="WAREHOUSE_READ" />,
                         children: [{ path: "/warehouses", element: <WarehousePage /> }],

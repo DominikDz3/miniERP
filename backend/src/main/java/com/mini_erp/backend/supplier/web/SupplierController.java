@@ -45,6 +45,11 @@ public class SupplierController {
         return supplierService.update(id, req);
     }
 
+    @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void activate(@PathVariable Long id){supplierService.activate(id); };
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @ResponseStatus(HttpStatus.NO_CONTENT)

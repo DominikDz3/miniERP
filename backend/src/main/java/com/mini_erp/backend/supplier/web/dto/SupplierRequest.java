@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 
 public record SupplierRequest(
         @NotBlank @Size(max = 200) String name,
-        @NotBlank @Size(max = 15)  String nip,
+        @NotBlank @Pattern(regexp = "\\d{10}", message = "NIP musi mieć dokładnie 10 cyfr")  String nip,
         @NotBlank @Email @Size(max = 150) String email,
         @NotBlank @Pattern(regexp = "\\+?[0-9\\s\\-()]{6,20}", message = "Nieprawidłowy numer telefonu") String phone,
         @NotBlank @Size(max = 200) String street,

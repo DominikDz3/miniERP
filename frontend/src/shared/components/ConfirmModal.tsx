@@ -31,14 +31,14 @@ export function ConfirmModal({
         <p className="text-gray-600 text-sm mb-6">{message}</p>
         <div className="flex justify-end gap-3">
           <button
-            className="px-4 py-2 text-sm border rounded hover:bg-gray-50"
+            className="px-4 py-2 text-sm border rounded hover:bg-gray-50 cursor-pointer"
             onClick={onCancel}
             disabled={loading}
           >
             {cancelLabel}
           </button>
           <button
-            className={`px-4 py-2 text-sm text-white rounded disabled:opacity-50 ${
+            className={`px-4 py-2 text-sm text-white rounded disabled:opacity-50 cursor-pointer ${
               danger ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
             }`}
             onClick={onConfirm}
