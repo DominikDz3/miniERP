@@ -78,7 +78,7 @@ public class CatalogSeeder implements ApplicationRunner {
             p.setUnit("szt");
             p.setStock(faker.number().numberBetween(0, 200));
             p.setMinStock(faker.number().numberBetween(0, 20));
-            p.setActive(faker.bool().bool());
+            p.setActive(true);
             p.setWarehouse(warehouse);
             products.save(p);
         }

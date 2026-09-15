@@ -6,9 +6,9 @@ public record SupplierRequest(
         @NotBlank @Size(max = 200) String name,
         @NotBlank @Size(max = 15)  String nip,
         @NotBlank @Email @Size(max = 150) String email,
-        @NotBlank @Size(max = 30)  String phone,
+        @NotBlank @Pattern(regexp = "\\+?[0-9\\s\\-()]{6,20}", message = "Nieprawidłowy numer telefonu") String phone,
         @NotBlank @Size(max = 200) String street,
         @NotBlank @Size(max = 100) String city,
-        @NotBlank @Size(max = 10)  String postalCode,
+        @NotBlank @Pattern(regexp = "[0-9\\s\\-]{3,10}", message = "Nieprawidłowy kod pocztowy") String postalCode,
         @Size(max = 60) String country
 ) {}
