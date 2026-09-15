@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
-@Componentgit ad
+@Component
 @Profile("dev")                 // runs only under the dev profile
 @Order(3)                       // after AdminBootstrap (roles/users must exist first)
 public class CustomerSeeder implements ApplicationRunner {
