@@ -56,19 +56,19 @@ public class ProductController {
     }
 
     @PostMapping("/{id}/receive")
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    @PreAuthorize("hasAuthority('WAREHOUSE_OPERATE')")
     public ProductResponse receive(@PathVariable Long id, @Valid @RequestBody StockOperationRequest request) {
         return productService.receive(id, request.quantity());
     }
 
     @PostMapping("/{id}/issue")
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    @PreAuthorize("hasAuthority('WAREHOUSE_OPERATE')")
     public ProductResponse issue(@PathVariable Long id, @Valid @RequestBody StockOperationRequest request) {
         return productService.issue(id, request.quantity());
     }
 
     @PostMapping("/{id}/transfer")
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    @PreAuthorize("hasAuthority('WAREHOUSE_OPERATE')")
     public ProductResponse transfer(@PathVariable Long id, @Valid @RequestBody TransferRequest request) {
         return productService.transfer(id, request.quantity(), request.targetWarehouseId());
     }
