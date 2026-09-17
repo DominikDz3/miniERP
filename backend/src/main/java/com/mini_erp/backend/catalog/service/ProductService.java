@@ -96,7 +96,7 @@ public class ProductService {
         for (StockItemsRequest.Item item : items) {
             Product p = findOrThrow(item.productId());
             p.setStock(p.getStock() + item.quantity());
-            logMovement(p, StockMovementType.PRZYJECIE, item.quantity(), null, null);
+            logMovement(p, StockMovementType.PRZYJECIE, item.quantity(), null, null, null, null);
         }
     }
 
@@ -110,7 +110,7 @@ public class ProductService {
                         "Za mało towaru: " + p.getName() + ". Dostępne " + p.getStock() + ", próba wydania " + item.quantity());
             }
             p.setStock(newStock);
-            logMovement(p, StockMovementType.WYDANIE, item.quantity(), null, null);
+            logMovement(p, StockMovementType.WYDANIE, item.quantity(), null, null, null,null);
         }
     }
 
@@ -155,7 +155,7 @@ public class ProductService {
         }
         products.save(target);
 
-        logMovement(source, StockMovementType.PRZESUNIECIE, quantity, targetWarehouseId, targetWarehouse.getName());
+        logMovement(source, StockMovementType.PRZESUNIECIE, quantity, targetWarehouseId, targetWarehouse.getName(), null, null);
 
         return toResponse(source);
     }
@@ -191,11 +191,25 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException("Nie znaleziono magazynu" + id));
     }
 
+    @Transactional
+    public void issueForOrder(Long productId, int quantity, String sourceType, Long sourceId) {
+        Product p = findOrThrow(productId);
+        int newStock = p.getStock() - quantity;
+        if (newStock < 0) {
+            throw new IllegalArgumentException(
+                    "Za mało towaru: " + p.getName() + ". Dostępne " + p.getStock() + ", próba wydania " + quantity);
+        }
+        p.setStock(newStock);
+        logMovement(p, StockMovementType.WYDANIE, quantity, null, null, sourceType, sourceId);
+    }
+
     private void logMovement(Product p,
                              StockMovementType type,
                              int quantity,
                              Long targetWarehouseId,
-                             String targetWarehouseName) {
+                             String targetWarehouseName,
+                             String sourceType,
+                             Long sourceId) {
         StockMovement m = new StockMovement();
         m.setProductId(p.getId());
         m.setType(type);
@@ -205,6 +219,8 @@ public class ProductService {
         m.setProductName(p.getName());
         m.setWarehouseName(p.getWarehouse().getName());
         m.setTargetWarehouseName(targetWarehouseName);
+        m.setSourceType(sourceType);
+        m.setSourceId(sourceId);
         m.setPerformedBy(currentUsername());
         stockMovements.save(m);
     }
