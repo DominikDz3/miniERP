@@ -1,5 +1,6 @@
 package com.mini_erp.backend.warehouse.service;
 
+import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.warehouse.domain.Warehouse;
 import com.mini_erp.backend.warehouse.mapper.WarehouseMapper;
 import com.mini_erp.backend.warehouse.repository.WarehouseRepository;
@@ -15,10 +16,12 @@ public class WarehouseService {
 
     private final WarehouseRepository warehouses;
     private final WarehouseMapper mapper;
+    private final ProductRepository products;
 
-    public WarehouseService(WarehouseRepository warehouses, WarehouseMapper mapper) {
+    public WarehouseService(WarehouseRepository warehouses, WarehouseMapper mapper, ProductRepository products) {
         this.warehouses = warehouses;
         this.mapper = mapper;
+        this.products = products;
     }
 
     @Transactional(readOnly = true)
@@ -56,7 +59,13 @@ public class WarehouseService {
 
     @Transactional
     public void deactivate(Long id) {
-        findOrThrow(id).setActive(false);
+        Warehouse w = findOrThrow(id);
+
+        if (products.existsByWarehouseIdAndActiveTrue(id)) {
+            throw new IllegalArgumentException(
+                    "Nie można dezaktywować magazynu z aktywnymi produktami. Najpierw przenieś lub dezaktywuj towar");
+        }
+        w.setActive(false);
     }
 
     private Warehouse findOrThrow(Long id) {

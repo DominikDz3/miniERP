@@ -18,6 +18,9 @@ public class StockMovement {
     @Column(name = "product_id", nullable = false)
     private Long productId;
 
+    @Column(name = "product_name", length = 200)
+    private String productName;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StockMovementType type;
@@ -28,8 +31,14 @@ public class StockMovement {
     @Column(name = "warehouse_id", nullable = false)
     private Long warehouseId;
 
+    @Column(name = "warehouse_name", length = 150)
+    private String warehouseName;
+
     @Column(name = "target_warehouse_id")
     private Long targetWarehouseId;
+
+    @Column(name = "target_warehouse_name", length = 150)
+    private String targetWarehouseName;
 
     @Column(name = "performed_by", nullable = false, length = 100)
     private String performedBy;

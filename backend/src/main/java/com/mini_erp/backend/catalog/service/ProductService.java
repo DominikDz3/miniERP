@@ -8,6 +8,7 @@ import com.mini_erp.backend.catalog.repository.CategoryRepository;
 import com.mini_erp.backend.catalog.web.dto.PriceHistoryResponse;
 import com.mini_erp.backend.catalog.web.dto.ProductRequest;
 import com.mini_erp.backend.catalog.web.dto.ProductResponse;
+import com.mini_erp.backend.catalog.web.dto.StockItemsRequest;
 import com.mini_erp.backend.shared.exception.NotFoundException;
 import com.mini_erp.backend.warehouse.domain.StockMovement;
 import com.mini_erp.backend.warehouse.domain.StockMovementType;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -42,9 +45,9 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductResponse> list(String search, Boolean active, Long categoryId, Pageable pageable) {
+    public Page<ProductResponse> list(String search, Boolean active, Long categoryId, Long warehouseId, Pageable pageable) {
         String normalized = (search == null || search.isBlank()) ? null : search.trim();
-        return products.search(normalized, active, categoryId, pageable).map(this::toResponse);
+        return products.search(normalized, active, categoryId, warehouseId, pageable).map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
@@ -89,26 +92,26 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse receive(Long id, int quantity) {
-        Product p = findOrThrow(id);
-        p.setStock(p.getStock() + quantity);
-
-        logMovement(p, StockMovementType.PRZYJECIE, quantity, null);
-        return toResponse(products.save(p));
+    public void receive(List<StockItemsRequest.Item> items) {
+        for (StockItemsRequest.Item item : items) {
+            Product p = findOrThrow(item.productId());
+            p.setStock(p.getStock() + item.quantity());
+            logMovement(p, StockMovementType.PRZYJECIE, item.quantity(), null, null);
+        }
     }
 
     @Transactional
-    public ProductResponse issue(Long id, int quantity) {
-        Product p = findOrThrow(id);
-        int newStock = p.getStock() - quantity;
-
-        if(newStock < 0) {
-            throw new IllegalArgumentException("Za mało towaru: dostępne " + p.getStock() + ", próba wydania " + quantity);
+    public void issue(List<StockItemsRequest.Item> items) {
+        for (StockItemsRequest.Item item : items) {
+            Product p = findOrThrow(item.productId());
+            int newStock = p.getStock() - item.quantity();
+            if (newStock < 0) {
+                throw new IllegalArgumentException(
+                        "Za mało towaru: " + p.getName() + ". Dostępne " + p.getStock() + ", próba wydania " + item.quantity());
+            }
+            p.setStock(newStock);
+            logMovement(p, StockMovementType.WYDANIE, item.quantity(), null, null);
         }
-        p.setStock(newStock);
-
-        logMovement(p, StockMovementType.WYDANIE, quantity, null);
-        return toResponse(products.save(p));
     }
 
     @Transactional
@@ -152,7 +155,7 @@ public class ProductService {
         }
         products.save(target);
 
-        logMovement(source, StockMovementType.PRZESUNIECIE, quantity, targetWarehouseId);
+        logMovement(source, StockMovementType.PRZESUNIECIE, quantity, targetWarehouseId, targetWarehouse.getName());
 
         return toResponse(source);
     }
@@ -188,13 +191,20 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException("Nie znaleziono magazynu" + id));
     }
 
-    private void logMovement(Product p, StockMovementType type, int quantity, Long targetWarehouseId) {
+    private void logMovement(Product p,
+                             StockMovementType type,
+                             int quantity,
+                             Long targetWarehouseId,
+                             String targetWarehouseName) {
         StockMovement m = new StockMovement();
         m.setProductId(p.getId());
         m.setType(type);
         m.setQuantity(quantity);
         m.setWarehouseId(p.getWarehouse().getId());
         m.setTargetWarehouseId(targetWarehouseId);
+        m.setProductName(p.getName());
+        m.setWarehouseName(p.getWarehouse().getName());
+        m.setTargetWarehouseName(targetWarehouseName);
         m.setPerformedBy(currentUsername());
         stockMovements.save(m);
     }

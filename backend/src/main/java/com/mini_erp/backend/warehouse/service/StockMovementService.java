@@ -27,11 +27,11 @@ public class StockMovementService {
         return movements.search(productId, warehouseId, type, from, to, pageable)
                 .map(m -> new StockMovementResponse(
                    m.getId(),
-                   m.getProductId(),
+                   m.getProductName(),
                    m.getType(),
                    m.getQuantity(),
-                   m.getWarehouseId(),
-                   m.getTargetWarehouseId(),
+                   m.getWarehouseName(),
+                   m.getTargetWarehouseName(),
                    m.getPerformedBy(),
                    m.getCreatedAt()
                 ));
