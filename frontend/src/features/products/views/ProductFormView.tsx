@@ -6,6 +6,7 @@ import { productFormSchema, type ProductFormValues } from "@/features/products/s
 import { useCreateProduct, useActiveCategories } from "@/features/products/hooks/useProducts";
 import type { ProductRequest } from "@/features/products/types/catalog";
 import { ApiError } from "@/shared/services/apiClient";
+import { useActiveWarehouses } from "@/features/warehouses/hooks/useWarehouses";
 
 const inputCls = "w-full border rounded px-3 py-2";
 
@@ -13,6 +14,7 @@ export function ProductFormView() {
   const navigate = useNavigate();
   const createProduct = useCreateProduct();
   const { data: categories } = useActiveCategories();
+  const { data: warehouses } = useActiveWarehouses();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -21,7 +23,7 @@ export function ProductFormView() {
     formState: { errors, isSubmitting },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: { categoryId: "", vatRate: 23, unit: "szt", stock: 0, minStock: 0 },
+    defaultValues: { categoryId: "",warehouseId: "", vatRate: 23, unit: "szt", stock: 0, minStock: 0 },
   });
 
   const onSubmit = async (values: ProductFormValues) => {
@@ -32,6 +34,7 @@ export function ProductFormView() {
       name: values.name,
       description: values.description || undefined,
       categoryId: Number(values.categoryId),
+      warehouseId: Number(values.warehouseId),
       purchasePrice: values.purchasePrice,
       salePrice: values.salePrice,
       vatRate: values.vatRate,
@@ -88,6 +91,17 @@ export function ProductFormView() {
           {errors.categoryId && <p className="text-red-600 text-xs mt-1">{errors.categoryId.message}</p>}
         </div>
 
+        <div>
+          <label className="block text-sm text-gray-500 mb-1">Magazyn</label>
+          <select className={inputCls} {...register("warehouseId")}>
+            <option value="" disabled>wybierz</option>
+              {warehouses?.map((w) => (
+                <option key={w.id} value={w.id}>{w.name}</option>
+              ))}
+          </select>
+          {errors.warehouseId && <p className="text-red-600 text-xs mt-1">{errors.warehouseId.message}</p>}
+        </div>
+
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-sm text-gray-500 mb-1">Cena zakupu</label>
@@ -125,11 +139,11 @@ export function ProductFormView() {
 
         <div className="flex justify-end gap-3 pt-2">
           <button type="button" onClick={() => navigate("/products")}
-            className="px-4 py-2 text-sm border rounded hover:bg-gray-50" cursor-pointer>
+            className="px-4 py-2 text-sm border rounded hover:bg-gray-50 cursor-pointer">
             Anuluj
           </button>
           <button type="submit" disabled={isSubmitting}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50" cursor-pointer>
+            className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer">
             {isSubmitting ? "Zapisywanie…" : "Zapisz"}
           </button>
         </div>
