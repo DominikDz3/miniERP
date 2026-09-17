@@ -2,6 +2,7 @@ package com.mini_erp.backend.catalog.service;
 
 import com.mini_erp.backend.catalog.domain.Category;
 import com.mini_erp.backend.catalog.domain.Product;
+import com.mini_erp.backend.catalog.mapper.ProductMapper;
 import com.mini_erp.backend.catalog.repository.PriceHistoryRepository;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.catalog.repository.CategoryRepository;
@@ -31,23 +32,26 @@ public class ProductService {
     private final PriceHistoryRepository priceHistory;
     private final WarehouseRepository warehouses;
     private final StockMovementRepository stockMovements;
+    private final ProductMapper mapper;
 
     public ProductService(ProductRepository products,
                           CategoryRepository categories,
                           PriceHistoryRepository priceHistory,
                           WarehouseRepository warehouses,
-                          StockMovementRepository stockMovements) {
+                          StockMovementRepository stockMovements,
+                          ProductMapper mapper) {
         this.products = products;
         this.categories = categories;
         this.priceHistory = priceHistory;
         this.warehouses = warehouses;
         this.stockMovements = stockMovements;
+        this.mapper = mapper;
     }
 
     @Transactional(readOnly = true)
     public Page<ProductResponse> list(String search, Boolean active, Long categoryId, Long warehouseId, Pageable pageable) {
         String normalized = (search == null || search.isBlank()) ? null : search.trim();
-        return products.search(normalized, active, categoryId, warehouseId, pageable).map(this::toResponse);
+        return products.search(normalized, active, categoryId, warehouseId, pageable).map(mapper::toResponse);
     }
 
     @Transactional(readOnly = true)
@@ -65,7 +69,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponse get(Long id) {
-        return toResponse(findOrThrow(id));
+        return mapper.toResponse(findOrThrow(id));
     }
 
     @Transactional
@@ -74,21 +78,19 @@ public class ProductService {
             throw new IllegalArgumentException("Produkt o takim SKU już istnieje w tym magazynie: " + req.sku());
         }
 
-        Category category = findCategoryOrThrow(req.categoryId());
-        Warehouse warehouse = findWarehouseOrThrow(req.warehouseId());
-
-        Product p = new Product();
-        apply(p, req, category, warehouse);
-        return toResponse(products.save(p));
+        Product p = mapper.toEntity(req);
+        p.setCategory(findCategoryOrThrow(req.categoryId()));
+        p.setWarehouse(findWarehouseOrThrow(req.warehouseId()));
+        return mapper.toResponse(products.save(p));
     }
 
     @Transactional
     public ProductResponse update(Long id, ProductRequest req) {
         Product p = findOrThrow(id);
-        Category category = findCategoryOrThrow(req.categoryId());
-        Warehouse warehouse = findWarehouseOrThrow(req.warehouseId());
-        apply(p, req, category, warehouse);
-        return toResponse(products.save(p));
+        mapper.update(req, p);
+        p.setCategory(findCategoryOrThrow(req.categoryId()));
+        p.setWarehouse(findWarehouseOrThrow(req.warehouseId()));
+        return mapper.toResponse(products.save(p));
     }
 
     @Transactional
@@ -137,19 +139,9 @@ public class ProductService {
 
         // if target warehouse does not have product, create new
         if(target == null) {
-            target = new Product();
-            target.setSku(source.getSku());
-            target.setName(source.getName());
-            target.setDescription(source.getDescription());
-            target.setCategory(source.getCategory());
+            target = mapper.copy(source);
             target.setWarehouse(targetWarehouse);
-            target.setPurchasePrice(source.getPurchasePrice());
-            target.setSalePrice(source.getSalePrice());
-            target.setVatRate(source.getVatRate());
-            target.setUnit(source.getUnit());
-            target.setMinStock(source.getMinStock());
             target.setStock(quantity);
-            target.setActive(true);
         } else {
             target.setStock(target.getStock() + quantity);
         }
@@ -157,7 +149,7 @@ public class ProductService {
 
         logMovement(source, StockMovementType.PRZESUNIECIE, quantity, targetWarehouseId, targetWarehouse.getName(), null, null);
 
-        return toResponse(source);
+        return mapper.toResponse(source);
     }
 
     @Transactional
@@ -223,40 +215,6 @@ public class ProductService {
         m.setSourceId(sourceId);
         m.setPerformedBy(currentUsername());
         stockMovements.save(m);
-    }
-
-    private void apply(Product p, ProductRequest req, Category category, Warehouse warehouse) {
-        p.setSku(req.sku());
-        p.setName(req.name());
-        p.setDescription(req.description());
-        p.setCategory(category);
-        p.setWarehouse(warehouse);
-        p.setPurchasePrice(req.purchasePrice());
-        p.setSalePrice(req.salePrice());
-        p.setVatRate(req.vatRate());
-        p.setUnit(req.unit());
-        p.setStock(req.stock());
-        p.setMinStock(req.minStock());
-    }
-
-    private ProductResponse toResponse(Product p) {
-        return new ProductResponse(
-         p.getId(),
-         p.getSku(),
-         p.getName(),
-         p.getDescription(),
-         p.getCategory().getId(),
-         p.getCategory().getName(),
-         p.getWarehouse().getId(),
-         p.getWarehouse().getName(),
-         p.getPurchasePrice(),
-         p.getSalePrice(),
-         p.getVatRate(),
-         p.getUnit(),
-         p.getStock(),
-         p.getMinStock(),
-         p.isActive()
-        );
     }
 
     private String currentUsername() {
