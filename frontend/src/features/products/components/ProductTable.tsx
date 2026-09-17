@@ -57,6 +57,12 @@ export function ProductTable({
         cell: (cell) => <span className="text-gray-600">{cell.getValue() as string}</span>,
       },
       {
+        accessorKey: "warehouseName",
+        header: "Magazyn",
+        enableSorting: false,
+        cell: (cell) => cell.getValue() as string,
+      },
+      {
         accessorKey: "salePrice",
         header: "Cena sprz.",
         cell: (cell) => (cell.getValue() as number).toFixed(2) + " zł",

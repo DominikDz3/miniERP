@@ -15,6 +15,8 @@ export interface ProductResponse {
   description: string | null;
   categoryId: number;
   categoryName: string;
+  warehouseId: number;
+  warehouseName: string; 
   purchasePrice: number;
   salePrice: number;
   vatRate: number;
@@ -29,6 +31,7 @@ export interface ProductRequest {
   name: string;
   description?: string;
   categoryId: number;
+  warehouseId: number; 
   purchasePrice: number;
   salePrice: number;
   vatRate: number;
@@ -58,6 +61,7 @@ export interface ProductListParams {
   search?: string;
   active?: boolean;
   categoryId?: number;
+  warehouseId?: number;
   page: number;
   size: number;
   sort?: string;

@@ -61,6 +61,8 @@ export function ProductDetailsView() {
         <dl className="grid grid-cols-2 gap-y-2 text-sm">
           <dt className="text-gray-500">SKU</dt>
           <dd className="font-mono">{product.sku}</dd>
+          <dt className="text-gray-500">Magazyn</dt>
+          <dd>{product.warehouseName}</dd>
           <dt className="text-gray-500">Kategoria</dt>
           <dd>{product.categoryName}</dd>
           <dt className="text-gray-500">Opis</dt>

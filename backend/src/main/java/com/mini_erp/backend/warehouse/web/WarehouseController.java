@@ -50,23 +50,23 @@ public class WarehouseController {
     public WarehouseResponse get(@PathVariable Long id) { return warehouseService.get(id); }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    @PreAuthorize("hasAuthority('WAREHOUSE_MANAGE')")
     @ResponseStatus(HttpStatus.CREATED)
     public WarehouseResponse create(@Valid @RequestBody WarehouseRequest req) { return warehouseService.create(req); }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    @PreAuthorize("hasAuthority('WAREHOUSE_MANAGE')")
     public WarehouseResponse update(@PathVariable Long id, @Valid @RequestBody WarehouseRequest req) {
         return warehouseService.update(id, req);
     }
 
     @PatchMapping("/{id}/activate")
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    @PreAuthorize("hasAuthority('WAREHOUSE_MANAGE')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void activate(@PathVariable Long id) { warehouseService.activate(id); }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    @PreAuthorize("hasAuthority('WAREHOUSE_MANAGE')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deactivate(@PathVariable Long id) { warehouseService.deactivate(id); }
 }

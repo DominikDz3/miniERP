@@ -26,8 +26,9 @@ public class ProductController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean active,
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long warehouseId,
             @ParameterObject Pageable pageable) {
-        return productService.list(search, active, categoryId, pageable);
+        return productService.list(search, active, categoryId, warehouseId, pageable);
     }
 
     @GetMapping("/{id}")
@@ -55,20 +56,22 @@ public class ProductController {
         return productService.update(id, request);
     }
 
-    @PostMapping("/{id}/receive")
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
-    public ProductResponse receive(@PathVariable Long id, @Valid @RequestBody StockOperationRequest request) {
-        return productService.receive(id, request.quantity());
+    @PostMapping("/receive")
+    @PreAuthorize("hasAuthority('WAREHOUSE_OPERATE')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void receive(@Valid @RequestBody StockItemsRequest request) {
+        productService.receive(request.items());
     }
 
-    @PostMapping("/{id}/issue")
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
-    public ProductResponse issue(@PathVariable Long id, @Valid @RequestBody StockOperationRequest request) {
-        return productService.issue(id, request.quantity());
+    @PostMapping("/issue")
+    @PreAuthorize("hasAuthority('WAREHOUSE_OPERATE')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void issue(@Valid @RequestBody StockItemsRequest request) {
+        productService.issue(request.items());
     }
 
     @PostMapping("/{id}/transfer")
-    @PreAuthorize("hasAuthority('WAREHOUSE_WRITE')")
+    @PreAuthorize("hasAuthority('WAREHOUSE_OPERATE')")
     public ProductResponse transfer(@PathVariable Long id, @Valid @RequestBody TransferRequest request) {
         return productService.transfer(id, request.quantity(), request.targetWarehouseId());
     }

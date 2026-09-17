@@ -76,6 +76,7 @@ function buildProductQuery(p: ProductListParams): string {
   if (p.search) q.set("search", p.search);
   if (p.active !== undefined) q.set("active", String(p.active));
   if (p.categoryId !== undefined) q.set("categoryId", String(p.categoryId));
+  if (p.warehouseId !== undefined) q.set("warehouseId", String(p.warehouseId));
   q.set("page", String(p.page));
   q.set("size", String(p.size));
   if (p.sort) q.set("sort", p.sort);
@@ -140,3 +141,36 @@ export function useDeactivateProduct() {
     onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all }),
   });
 }
+
+// warehouse operations
+
+export function useReceiveStock() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (items: { productId: number; quantity: number}[]) =>
+      apiFetch<void>(`/products/receive`, { method: "POST", body: JSON.stringify({ items }),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all }),
+  });
+}
+
+export function useIssueStock() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (items: { productId: number; quantity: number }[]) =>
+      apiFetch<ProductResponse>(`/products/issue`, { method: "POST", body: JSON.stringify({ items }),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all }),
+  });
+}
+
+export function useTransferProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, quantity, targetWarehouseId }: { id: number; quantity: number; targetWarehouseId: number }) =>
+      apiFetch<void>(`/products/${id}/transfer`, { method: "POST", body: JSON.stringify({ quantity, targetWarehouseId }),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all }),
+  });
+}
+
