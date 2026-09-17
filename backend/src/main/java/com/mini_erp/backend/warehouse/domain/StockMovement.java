@@ -43,6 +43,12 @@ public class StockMovement {
     @Column(name = "performed_by", nullable = false, length = 100)
     private String performedBy;
 
+    @Column(name = "source_type", length = 20)
+    private String sourceType;
+
+    @Column(name = "source_id")
+    private Long sourceId;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 }
