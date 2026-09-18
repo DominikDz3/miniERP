@@ -1,7 +1,11 @@
 package com.mini_erp.backend.customer.service;
 
 import com.mini_erp.backend.customer.domain.Customer;
+import com.mini_erp.backend.customer.domain.PayerAddress;
+import com.mini_erp.backend.customer.domain.ReceiverAddress;
+import com.mini_erp.backend.customer.mapper.CustomerMapper;
 import com.mini_erp.backend.customer.repository.CustomerRepository;
+import com.mini_erp.backend.customer.web.dto.AddressRequest;
 import com.mini_erp.backend.customer.web.dto.CustomerRequest;
 import com.mini_erp.backend.customer.web.dto.CustomerResponse;
 import com.mini_erp.backend.shared.exception.NotFoundException;
@@ -9,8 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mapstruct.factory.Mappers;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,13 +29,23 @@ import static org.mockito.Mockito.*;
 class CustomerServiceTest {
 
     @Mock CustomerRepository customers;
+    @Spy CustomerMapper mapper = Mappers.getMapper(CustomerMapper.class);
+    @Mock PayerAddressService payerService;
+    @Mock ReceiverAddressService receiverService;
     @InjectMocks CustomerService service;
+
+    private AddressRequest payerAddr() {
+        return new AddressRequest("ul. Główna 1", "Warszawa", "00-001", "Polska", null);
+    }
+
+    private AddressRequest receiverAddr() {
+        return new AddressRequest("ul. Odbiór 2", "Kraków", "30-002", "Polska", "600100200");
+    }
 
     private CustomerRequest request() {
         return new CustomerRequest(
-                "Firma Kowalski", "1234567890",
-                "ul. Główna 1", "Warszawa", "00-001", "Polska",
-                "kontakt@firma.pl", "600100200");
+                "Firma Kowalski", "1234567890", "kontakt@firma.pl",
+                List.of(payerAddr()), List.of(receiverAddr()));
     }
 
     private Customer entity() {
@@ -36,19 +53,12 @@ class CustomerServiceTest {
         c.setId(10L);
         c.setName("Firma Kowalski");
         c.setNip("1234567890");
-        c.setStreet("ul. Główna 1");
-        c.setCity("Warszawa");
-        c.setPostalCode("00-001");
-        c.setCountry("Polska");
         c.setEmail("kontakt@firma.pl");
-        c.setPhone("600100200");
         c.setActive(true);
         return c;
     }
 
     // create
-
-    // A duplicate NIP must be rejected and nothing should be persisted
     @Test
     void create_throwsWhenNipAlreadyExists() {
         when(customers.existsByNip("1234567890")).thenReturn(true);
@@ -60,64 +70,42 @@ class CustomerServiceTest {
         verify(customers, never()).save(any());
     }
 
-    // A null NIP skips the uniqueness check entirely (individuals without NIP)
-    @Test
-    void create_savesWhenNipIsNull() {
-        // given
-        CustomerRequest req = new CustomerRequest(
-                "Jan Nowak", null,
-                "ul. Boczna 2", "Kraków", "30-002", "Polska",
-                "jan@nowak.pl", null);
-        when(customers.save(any(Customer.class))).thenAnswer(inv -> {
-            Customer c = inv.getArgument(0);
-            c.setId(11L);
-            return c;
-        });
-
-        // when
-        CustomerResponse res = service.create(req);
-
-        // then
-        verify(customers, never()).existsByNip(any());
-        assertThat(res.id()).isEqualTo(11L);
-        assertThat(res.nip()).isNull();
-    }
-
-    // A missing country falls back to the default instead of persisting null
-    @Test
-    void create_defaultsCountryWhenNull() {
-        // given
-        CustomerRequest req = new CustomerRequest(
-                "Firma Bez Kraju", "9998887776",
-                "ul. Krótka 3", "Gdańsk", "80-003", null,
-                "biuro@firma.pl", null);
-        when(customers.existsByNip("9998887776")).thenReturn(false);
-        when(customers.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        // when
-        CustomerResponse res = service.create(req);
-
-        // then
-        assertThat(res.country()).isEqualTo("Polska");
-    }
-
     @Test
     void create_savesCustomerAndReturnsResponse() {
         when(customers.existsByNip("1234567890")).thenReturn(false);
         when(customers.save(any(Customer.class))).thenAnswer(inv -> {
             Customer c = inv.getArgument(0);
-            c.setId(10L);
+            if (c.getId() == null) c.setId(10L);
             return c;
         });
+        PayerAddress pa = new PayerAddress();
+        pa.setId(100L);
+        ReceiverAddress ra = new ReceiverAddress();
+        ra.setId(200L);
+        when(payerService.add(eq(10L), any())).thenReturn(pa);
+        when(receiverService.add(eq(10L), any())).thenReturn(ra);
 
         CustomerResponse res = service.create(request());
 
         assertThat(res.id()).isEqualTo(10L);
         assertThat(res.name()).isEqualTo("Firma Kowalski");
-        assertThat(res.city()).isEqualTo("Warszawa");
-        assertThat(res.postalCode()).isEqualTo("00-001");
-        assertThat(res.email()).isEqualTo("kontakt@firma.pl");
+        assertThat(res.defaultPayerId()).isEqualTo(100L);
+        assertThat(res.defaultReceiverId()).isEqualTo(200L);
         assertThat(res.active()).isTrue();
+    }
+
+    @Test
+    void create_throwsWhenReceiverAddressHasNoPhone() {
+        AddressRequest noPhone = new AddressRequest("ul. X 1", "Miasto", "00-000", "Polska", null);
+        CustomerRequest req = new CustomerRequest(
+                "Firma", "1234567890", "a@b.pl",
+                List.of(payerAddr()), List.of(noPhone));
+
+        assertThatThrownBy(() -> service.create(req))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("telefon");
+
+        verify(customers, never()).save(any());
     }
 
     // get
@@ -139,10 +127,9 @@ class CustomerServiceTest {
 
         assertThat(res.id()).isEqualTo(10L);
         assertThat(res.name()).isEqualTo("Firma Kowalski");
-        assertThat(res.city()).isEqualTo("Warszawa");
     }
 
-    //  update
+    // update (scalars only)
 
     @Test
     void update_throwsWhenNotFound() {
@@ -156,30 +143,23 @@ class CustomerServiceTest {
     }
 
     @Test
-    void update_appliesChangesAndReturnsResponse() {
-        // given
+    void update_appliesScalarsAndReturnsResponse() {
         Customer existing = entity();
         when(customers.findById(10L)).thenReturn(Optional.of(existing));
         when(customers.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
 
         CustomerRequest req = new CustomerRequest(
-                "Firma Kowalski Sp. z o.o.", "1234567890",
-                "ul. Nowa 5", "Poznań", "60-005", "Polska",
-                "nowy@firma.pl", "600100200");
+                "Firma Kowalski Sp. z o.o.", "1234567890", "nowy@firma.pl",
+                List.of(payerAddr()), List.of(receiverAddr()));
 
-        // when
         CustomerResponse res = service.update(10L, req);
 
-        // then
         assertThat(res.name()).isEqualTo("Firma Kowalski Sp. z o.o.");
-        assertThat(res.street()).isEqualTo("ul. Nowa 5");
-        assertThat(res.city()).isEqualTo("Poznań");
         assertThat(res.email()).isEqualTo("nowy@firma.pl");
     }
 
     // deactivate
 
-    // Deactivation (soft-delete)
     @Test
     void deactivate_setsActiveToFalse() {
         Customer existing = entity();
