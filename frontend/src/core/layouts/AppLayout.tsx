@@ -21,7 +21,7 @@ const NAV: NavItem[] = [
         { path: "/warehouses/movements", label: "Ruchy", authority: "WAREHOUSE_MANAGE" },
       ],
     },
-    { path: "/sales", label: "Sprzedaż", authority: "SALES_READ"},
+    { path: "/sales-orders", label: "Sprzedaż", authority: "SALES_READ"},
     { path: "/purchases", label: "Zakupy", authority: "PURCHASE_READ"},
     { path: "/reports", label: "Raporty", authority: "REPORT_READ"},
     { path: "/audit", label: "Audit log", authority: "AUDIT_READ"}

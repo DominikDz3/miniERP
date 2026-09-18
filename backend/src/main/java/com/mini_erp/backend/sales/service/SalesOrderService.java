@@ -4,17 +4,18 @@ import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.catalog.service.ProductService;
 import com.mini_erp.backend.customer.domain.Customer;
+import com.mini_erp.backend.customer.domain.ReceiverAddress;
 import com.mini_erp.backend.customer.repository.CustomerRepository;
+import com.mini_erp.backend.customer.repository.ReceiverAddressRepository;
 import com.mini_erp.backend.sales.domain.SalesOrder;
 import com.mini_erp.backend.sales.domain.SalesOrderItem;
 import com.mini_erp.backend.sales.domain.SalesOrderStatus;
+import com.mini_erp.backend.sales.domain.SalesOrderStatusHistory;
 import com.mini_erp.backend.sales.mapper.SalesOrderMapper;
 import com.mini_erp.backend.sales.repository.SalesOrderItemRepository;
 import com.mini_erp.backend.sales.repository.SalesOrderRepository;
-import com.mini_erp.backend.sales.web.dto.SalesOrderItemRequest;
-import com.mini_erp.backend.sales.web.dto.SalesOrderItemResponse;
-import com.mini_erp.backend.sales.web.dto.SalesOrderRequest;
-import com.mini_erp.backend.sales.web.dto.SalesOrderResponse;
+import com.mini_erp.backend.sales.repository.SalesOrderStatusHistoryRepository;
+import com.mini_erp.backend.sales.web.dto.*;
 import com.mini_erp.backend.shared.exception.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,19 +39,25 @@ public class SalesOrderService {
     private final CustomerRepository customers;
     private final ProductRepository products;
     private final ProductService productService;
+    private final ReceiverAddressRepository receiverAddresses;
+    private final SalesOrderStatusHistoryRepository statusHistory;
 
     public SalesOrderService(SalesOrderRepository orders,
                              SalesOrderItemRepository items,
                              SalesOrderMapper mapper,
                              CustomerRepository customers,
                              ProductRepository products,
-                             ProductService productService) {
+                             ProductService productService,
+                             ReceiverAddressRepository receiverAddresses,
+                             SalesOrderStatusHistoryRepository statusHistory) {
         this.orders = orders;
         this.items = items;
         this.mapper = mapper;
         this.customers = customers;
         this.products = products;
         this.productService = productService;
+        this.receiverAddresses = receiverAddresses;
+        this.statusHistory = statusHistory;
     }
 
     private static final Map<SalesOrderStatus, Set<SalesOrderStatus>> ALLOWED = Map.of(
@@ -65,12 +72,13 @@ public class SalesOrderService {
     @Transactional(readOnly = true)
     public Page<SalesOrderResponse> list(Long customerId, SalesOrderStatus status,
                                          LocalDateTime from, LocalDateTime to, Pageable pageable) {
-        return orders.search(customerId, status, from, to, pageable).map(mapper::toResponse);
+        return orders.search(customerId, status, from, to, pageable).map(o -> mapper.toResponse(o, formatAddress(o.getReceiverAddressId())));
     }
 
     @Transactional(readOnly = true)
     public SalesOrderResponse get(Long id) {
-        return mapper.toResponse(findOrThrow(id));
+        SalesOrder order = findOrThrow(id);
+        return mapper.toResponse(order, formatAddress(order.getReceiverAddressId()));
     }
 
     @Transactional(readOnly = true)
@@ -87,8 +95,15 @@ public class SalesOrderService {
     public SalesOrderResponse create(SalesOrderRequest req) {
         Customer customer = findCustomerOrThrow(req.customerId());
 
+        ReceiverAddress address = receiverAddresses.findById(req.receiverAddressId())
+                .orElseThrow(() -> new NotFoundException("Nie znaleziono adresu: " + req.receiverAddressId()));
+        if (!address.getCustomerId().equals(customer.getId())) {
+            throw new IllegalArgumentException("Adres nie należy do wskazanego klienta");
+        }
+
         SalesOrder order = new SalesOrder();
         order.setCustomer(customer);
+        order.setReceiverAddressId(address.getId());
         order.setStatus(SalesOrderStatus.NEW);
         order.setCreatedBy(currentUsername());
         order = orders.save(order);
@@ -107,36 +122,77 @@ public class SalesOrderService {
         }
 
         recomputeTotals(order);
-        return mapper.toResponse(orders.save(order));
+        orders.save(order);
+        logStatusChange(order.getId(), null, SalesOrderStatus.NEW);
+        return mapper.toResponse(order, formatAddress(order.getReceiverAddressId()));
     }
 
-    public void confirm(Long id) { changeStatus(findOrThrow(id), SalesOrderStatus.CONFIRMED); }
+    @Transactional
+    public void confirm(Long id) {
+        SalesOrder order = findOrThrow(id);
+        requireTransition(order.getStatus(), SalesOrderStatus.CONFIRMED);
+        for (SalesOrderItem line : items.findByOrderIdOrderById(id)) {
+            Product p = findProductOrThrow(line.getProductId());
+            if (p.getStock() < line.getQuantity()) {
+                throw new IllegalArgumentException(
+                        "Za mało towaru: " + p.getName() + ". Dostępne " + p.getStock() + ", zamówiono " + line.getQuantity());
+            }
+        }
+        logStatusChange(id, order.getStatus(), SalesOrderStatus.CONFIRMED);
+        order.setStatus(SalesOrderStatus.CONFIRMED);
+        orders.save(order);
+    }
 
-    public void process(Long id) { changeStatus(findOrThrow(id), SalesOrderStatus.PROCESSING); }
+    @Transactional
+    public void process(Long id) {
+        SalesOrder order = findOrThrow(id);
+        requireTransition(order.getStatus(), SalesOrderStatus.PROCESSING);
+        for (SalesOrderItem line : items.findByOrderIdOrderById(id)) {
+            productService.issueForOrder(line.getProductId(), line.getQuantity(),
+                    "SALES_ORDER", order.getId());
+        }
+        logStatusChange(id, order.getStatus(), SalesOrderStatus.PROCESSING);
+        order.setStatus(SalesOrderStatus.PROCESSING);
+        orders.save(order);
+    }
 
     public void ready(Long id) { changeStatus(findOrThrow(id), SalesOrderStatus.READY); }
 
-    public void cancel(Long id) { changeStatus(findOrThrow(id), SalesOrderStatus.CANCELLED); }
+    @Transactional
+    public void cancel(Long id) {
+        SalesOrder order = findOrThrow(id);
+        requireTransition(order.getStatus(), SalesOrderStatus.CANCELLED);
+        if (order.getStatus() == SalesOrderStatus.PROCESSING
+                || order.getStatus() == SalesOrderStatus.READY) {
+            for (SalesOrderItem line : items.findByOrderIdOrderById(id)) {
+                productService.returnForOrder(line.getProductId(), line.getQuantity(),
+                        "SALES_ORDER", order.getId());
+            }
+        }
+        logStatusChange(id, order.getStatus(), SalesOrderStatus.CANCELLED);
+        order.setStatus(SalesOrderStatus.CANCELLED);
+        orders.save(order);
+    }
 
     @Transactional
-    public void complete(Long id) {
-        SalesOrder order = findOrThrow(id);
-        requireTransition(order.getStatus(), SalesOrderStatus.COMPLETED);   // najpierw walidacja, potem stan
+    public void complete(Long id) { changeStatus(findOrThrow(id), SalesOrderStatus.COMPLETED); }
 
-        for (SalesOrderItem line : items.findByOrderIdOrderById(id)) {
-            productService.issueForOrder(
-                    line.getProductId(),
-                    line.getQuantity(),
-                    "SALES_ORDER",
-                    order.getId());
+    @Transactional(readOnly = true)
+    public List<StatusHistoryResponse> getHistory(Long id) {
+        if (!orders.existsById(id)) {
+            throw new NotFoundException("Nie znaleziono zamówienia: " + id);
         }
-        order.setStatus(SalesOrderStatus.COMPLETED);
+        return statusHistory.findByOrderIdOrderByChangedAtAsc(id).stream()
+                .map(h -> new StatusHistoryResponse(
+                        h.getId(), h.getFromStatus(), h.getToStatus(), h.getChangedBy(), h.getChangedAt()))
+                .toList();
     }
 
     // helpers
 
     private void changeStatus(SalesOrder order, SalesOrderStatus target) {
         requireTransition(order.getStatus(), target);
+        logStatusChange(order.getId(), order.getStatus(), target);
         order.setStatus(target);
         orders.save(order);
     }
@@ -145,6 +201,12 @@ public class SalesOrderService {
         if (!ALLOWED.get(from).contains(to)) {
             throw new IllegalArgumentException("Niedozwolone przejście statusu: " + from + " -> " + to);
         }
+    }
+
+    private String formatAddress(Long addressId) {
+        return receiverAddresses.findById(addressId)
+                .map(a -> a.getStreet() + ", " + a.getPostalCode() + " " + a.getCity())
+                .orElse("-");
     }
 
     private void recomputeTotals(SalesOrder order) {
@@ -160,6 +222,15 @@ public class SalesOrderService {
         order.setTotalNet(net);
         order.setTotalVat(vat);
         order.setTotalGross(net.add(vat));
+    }
+
+    private void logStatusChange(Long orderId, SalesOrderStatus from, SalesOrderStatus to) {
+        SalesOrderStatusHistory h = new SalesOrderStatusHistory();
+        h.setOrderId(orderId);
+        h.setFromStatus(from);   // null przy utworzeniu
+        h.setToStatus(to);
+        h.setChangedBy(currentUsername());
+        statusHistory.save(h);
     }
 
     private SalesOrder findOrThrow(Long id) {

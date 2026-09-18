@@ -12,9 +12,11 @@ import java.math.BigDecimal;
 @Mapper(componentModel = "spring")
 public interface SalesOrderMapper {
 
-    @Mapping(target = "customerId", source = "customer.id")
-    @Mapping(target = "customerName", source = "customer.name")
-    SalesOrderResponse toResponse(SalesOrder order);
+    @Mapping(target = "customerId", source = "order.customer.id")
+    @Mapping(target = "customerName", source = "order.customer.name")
+    @Mapping(target = "receiverAddressId", source = "order.receiverAddressId")
+    @Mapping(target = "receiverAddress", source = "receiverAddress")
+    SalesOrderResponse toResponse(SalesOrder order, String receiverAddress);
 
     @Mapping(target = "lineNet", expression = "java(lineNet(item))")
     SalesOrderItemResponse toItemResponse(SalesOrderItem item);
