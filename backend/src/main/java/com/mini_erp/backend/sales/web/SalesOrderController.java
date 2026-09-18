@@ -5,6 +5,7 @@ import com.mini_erp.backend.sales.service.SalesOrderService;
 import com.mini_erp.backend.sales.web.dto.SalesOrderItemResponse;
 import com.mini_erp.backend.sales.web.dto.SalesOrderRequest;
 import com.mini_erp.backend.sales.web.dto.SalesOrderResponse;
+import com.mini_erp.backend.sales.web.dto.StatusHistoryResponse;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -74,4 +75,10 @@ public class SalesOrderController {
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('SALES_WRITE')")
     public void cancel(@PathVariable Long id) { service.cancel(id); }
+
+    @GetMapping("/{id}/history")
+    @PreAuthorize("hasAuthority('SALES_READ')")
+    public List<StatusHistoryResponse> getHistory(@PathVariable Long id) {
+        return service.getHistory(id);
+    }
 }

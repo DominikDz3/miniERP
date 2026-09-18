@@ -9,6 +9,8 @@ public record SalesOrderResponse(
         Long id,
         Long customerId,
         String customerName,
+        Long receiverAddressId,
+        String receiverAddress,
         SalesOrderStatus status,
         BigDecimal totalNet,
         BigDecimal totalVat,

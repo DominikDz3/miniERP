@@ -3,7 +3,9 @@ package com.mini_erp.backend.sales;
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.customer.domain.Customer;
+import com.mini_erp.backend.customer.domain.ReceiverAddress;
 import com.mini_erp.backend.customer.repository.CustomerRepository;
+import com.mini_erp.backend.customer.repository.ReceiverAddressRepository;
 import com.mini_erp.backend.sales.domain.SalesOrder;
 import com.mini_erp.backend.sales.domain.SalesOrderItem;
 import com.mini_erp.backend.sales.domain.SalesOrderStatus;
@@ -32,15 +34,18 @@ public class SalesOrderSeeder implements ApplicationRunner {
     private final SalesOrderItemRepository items;
     private final CustomerRepository customers;
     private final ProductRepository products;
+    private final ReceiverAddressRepository receiverAddresses;
 
     public SalesOrderSeeder(SalesOrderRepository orders,
                             SalesOrderItemRepository items,
                             CustomerRepository customers,
-                            ProductRepository products) {
+                            ProductRepository products,
+                            ReceiverAddressRepository receiverAddresses) {
         this.orders = orders;
         this.items = items;
         this.customers = customers;
         this.products = products;
+        this.receiverAddresses = receiverAddresses;
     }
 
     @Override
@@ -56,8 +61,13 @@ public class SalesOrderSeeder implements ApplicationRunner {
         for (int i = 0; i < ORDER_COUNT; i++) {
             Customer customer = allCustomers.get(faker.number().numberBetween(0, allCustomers.size()));
 
+            List<ReceiverAddress> addrs = receiverAddresses.findByCustomerIdOrderById(customer.getId());
+            if (addrs.isEmpty()) continue;
+            ReceiverAddress addr = addrs.get(faker.number().numberBetween(0, addrs.size()));
+
             SalesOrder order = new SalesOrder();
             order.setCustomer(customer);
+            order.setReceiverAddressId(addr.getId());
             order.setStatus(i % 2 == 0 ? SalesOrderStatus.NEW : SalesOrderStatus.CONFIRMED);
             order.setCreatedBy("seeder");
             order = orders.save(order);

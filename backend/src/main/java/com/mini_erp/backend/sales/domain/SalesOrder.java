@@ -21,6 +21,9 @@ public class SalesOrder {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    @Column(name = "receiver_address_id", nullable = false)
+    private Long receiverAddressId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private SalesOrderStatus status = SalesOrderStatus.NEW;
