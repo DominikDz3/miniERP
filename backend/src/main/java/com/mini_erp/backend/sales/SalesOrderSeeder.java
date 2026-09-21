@@ -99,7 +99,7 @@ public class SalesOrderSeeder implements ApplicationRunner {
                 items.save(item);
 
                 BigDecimal lineNet = p.getSalePrice().multiply(BigDecimal.valueOf(quantity));
-                BigDecimal lineVat = lineNet.multiply(p.getVatRate())
+                BigDecimal lineVat = lineNet.multiply(BigDecimal.valueOf(p.getVatRate().getPercent()))
                         .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
                 net = net.add(lineNet);
                 vat = vat.add(lineVat);

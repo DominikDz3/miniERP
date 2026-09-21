@@ -1,5 +1,6 @@
 package com.mini_erp.backend.purchase.domain;
 
+import com.mini_erp.backend.catalog.domain.VatRate;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,24 +16,25 @@ public class PurchaseOrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
+    @Column(nullable = false)
     private Long orderId;
 
-    @Column(name = "product_id", nullable = false)
+    @Column(nullable = false)
     private Long productId;
 
     @Column(nullable = false, length = 64)
     private String sku;
 
-    @Column(name = "product_name", nullable = false, length = 200)
+    @Column(nullable = false, length = 200)
     private String productName;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(name = "purchase_price", nullable = false, precision = 19, scale = 4)
+    @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal purchasePrice;
 
-    @Column(name = "vat_rate", nullable = false, precision = 5, scale = 2)
-    private BigDecimal vatRate;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private VatRate vatRate;
 }

@@ -40,8 +40,9 @@ public class Product {
     @Column(name = "sale_price", nullable = false, precision = 19, scale = 4)
     private BigDecimal salePrice;
 
-    @Column(name = "vat_rate", nullable = false, precision = 5, scale = 2)
-    private BigDecimal vatRate;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vat_rate", nullable = false, length = 10)
+    private VatRate vatRate;
 
     @Column(nullable = false, length = 20)
     private String unit;

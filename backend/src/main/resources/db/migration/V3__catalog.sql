@@ -12,7 +12,7 @@ create table products (
     category_id     bigint        not null references categories(id),
     purchase_price  numeric(19,4) not null,
     sale_price      numeric(19,4) not null,
-    vat_rate        numeric(5,2)  not null,
+    vat_rate        varchar(10)   not null,
     unit            varchar(20)   not null,
     min_stock       integer       not null default 0,
     stock           integer       not null default 0,

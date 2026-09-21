@@ -1,5 +1,6 @@
 package com.mini_erp.backend.sales.domain;
 
+import com.mini_erp.backend.catalog.domain.VatRate;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,6 +34,7 @@ public class SalesOrderItem {
     @Column(name = "unit_price", nullable = false, precision = 19, scale = 4)
     private BigDecimal unitPrice;
 
-    @Column(name = "vat_rate", nullable = false, precision = 5, scale = 2)
-    private BigDecimal vatRate;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vat_rate", nullable = false, length = 10)
+    private VatRate vatRate;
 }

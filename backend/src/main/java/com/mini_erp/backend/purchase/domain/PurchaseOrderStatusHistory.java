@@ -15,20 +15,20 @@ public class PurchaseOrderStatusHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
+    @Column(nullable = false)
     private Long orderId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "from_status", length = 20)
+    @Column(length = 20)
     private PurchaseOrderStatus fromStatus;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "to_status", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private PurchaseOrderStatus toStatus;
 
-    @Column(name = "changed_by", nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String changedBy;
 
-    @Column(name = "changed_at", insertable = false, updatable = false)
+    @Column(insertable = false, updatable = false)
     private LocalDateTime changedAt;
 }

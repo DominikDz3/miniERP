@@ -214,7 +214,7 @@ public class SalesOrderService {
         BigDecimal vat = BigDecimal.ZERO;
         for (SalesOrderItem line : items.findByOrderIdOrderById(order.getId())) {
             BigDecimal lineNet = line.getUnitPrice().multiply(BigDecimal.valueOf(line.getQuantity()));
-            BigDecimal lineVat = lineNet.multiply(line.getVatRate())
+            BigDecimal lineVat = lineNet.multiply(BigDecimal.valueOf(line.getVatRate().getPercent()))
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
             net = net.add(lineNet);
             vat = vat.add(lineVat);

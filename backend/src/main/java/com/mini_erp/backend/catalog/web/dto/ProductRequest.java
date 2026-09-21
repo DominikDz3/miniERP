@@ -1,5 +1,6 @@
 package com.mini_erp.backend.catalog.web.dto;
 
+import com.mini_erp.backend.catalog.domain.VatRate;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ public record ProductRequest (
         @NotNull Long warehouseId,
         @NotNull @PositiveOrZero BigDecimal purchasePrice,
         @NotNull @PositiveOrZero BigDecimal salePrice,
-        @NotNull @PositiveOrZero BigDecimal vatRate,
+        @NotNull @PositiveOrZero VatRate vatRate,
         @NotBlank @Size(max = 20) String unit,
         @NotNull @PositiveOrZero Integer stock,
         @NotNull @PositiveOrZero Integer minStock

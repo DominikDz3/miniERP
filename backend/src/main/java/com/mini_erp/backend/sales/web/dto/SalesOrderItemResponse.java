@@ -1,5 +1,7 @@
 package com.mini_erp.backend.sales.web.dto;
 
+import com.mini_erp.backend.catalog.domain.VatRate;
+
 import java.math.BigDecimal;
 
 public record SalesOrderItemResponse(
@@ -9,6 +11,6 @@ public record SalesOrderItemResponse(
         String productName,
         Integer quantity,
         BigDecimal unitPrice,
-        BigDecimal vatRate,
+        VatRate vatRate,
         BigDecimal lineNet
 ) {}

@@ -19,7 +19,7 @@ create table purchase_order_items (
     product_name   varchar(200)  not null,
     quantity       integer       not null check (quantity > 0),
     purchase_price numeric(19,4) not null,
-    vat_rate       numeric(5,2)  not null,
+    vat_rate       varchar(10)  not null,
     constraint uq_po_order_product unique (order_id, product_id)
 );
 
