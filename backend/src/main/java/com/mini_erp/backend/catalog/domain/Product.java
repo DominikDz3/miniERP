@@ -27,21 +27,21 @@ public class Product {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "warehouse_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Warehouse warehouse;
 
-    @Column(name = "purchase_price", nullable = false, precision = 19, scale = 4)
+    @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal purchasePrice;
 
-    @Column(name = "sale_price", nullable = false, precision = 19, scale = 4)
+    @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal salePrice;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "vat_rate", nullable = false, length = 10)
+    @Column(nullable = false, length = 10)
     private VatRate vatRate;
 
     @Column(nullable = false, length = 20)
@@ -50,7 +50,7 @@ public class Product {
     @Column(nullable = false)
     private Integer stock = 0;
 
-    @Column(name = "min_stock", nullable = false)
+    @Column(nullable = false)
     private Integer minStock = 0;
 
     @Column(nullable = false)
@@ -59,6 +59,6 @@ public class Product {
     @Version
     private Long version;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(insertable = false, updatable = false)
     private LocalDateTime createdAt;
 }

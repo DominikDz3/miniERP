@@ -16,25 +16,25 @@ public class SalesOrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
+    @Column(nullable = false)
     private Long orderId;
 
-    @Column(name = "product_id", nullable = false)
+    @Column(nullable = false)
     private Long productId;
 
     @Column(nullable = false, length = 64)
     private String sku;
 
-    @Column(name = "product_name", nullable = false, length = 200)
+    @Column(nullable = false, length = 200)
     private String productName;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(name = "unit_price", nullable = false, precision = 19, scale = 4)
+    @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal unitPrice;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "vat_rate", nullable = false, length = 10)
+    @Column(nullable = false, length = 10)
     private VatRate vatRate;
 }

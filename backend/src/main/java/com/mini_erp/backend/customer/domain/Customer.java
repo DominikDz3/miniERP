@@ -28,12 +28,10 @@ public class Customer {
     @Column(nullable = false)
     private boolean active = true;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "default_payer_id")
     private Long defaultPayerId;
 
-    @Column(name = "default_receiver_id")
     private Long defaultReceiverId;
 }
