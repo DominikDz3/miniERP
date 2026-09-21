@@ -1,4 +1,4 @@
-package com.mini_erp.backend.sales.domain;
+package com.mini_erp.backend.purchase.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,9 +7,9 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "sales_order_status_history")
+@Table(name = "purchase_order_status_history")
 @Getter @Setter
-public class SalesOrderStatusHistory {
+public class PurchaseOrderStatusHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +20,11 @@ public class SalesOrderStatusHistory {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private SalesOrderStatus fromStatus;
+    private PurchaseOrderStatus fromStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private SalesOrderStatus toStatus;
+    private PurchaseOrderStatus toStatus;
 
     @Column(nullable = false, length = 100)
     private String changedBy;

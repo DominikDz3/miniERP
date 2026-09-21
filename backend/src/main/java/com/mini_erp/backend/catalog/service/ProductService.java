@@ -2,7 +2,7 @@ package com.mini_erp.backend.catalog.service;
 
 import com.mini_erp.backend.catalog.domain.Category;
 import com.mini_erp.backend.catalog.domain.Product;
-import com.mini_erp.backend.catalog.mapper.ProductMapper;
+import com.mini_erp.backend.shared.mappers.ProductMapper;
 import com.mini_erp.backend.catalog.repository.PriceHistoryRepository;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.catalog.repository.CategoryRepository;
@@ -193,6 +193,13 @@ public class ProductService {
         }
         p.setStock(newStock);
         logMovement(p, StockMovementType.WYDANIE, quantity, null, null, sourceType, sourceId);
+    }
+
+    @Transactional
+    public void receiveForOrder(Long productId, int quantity, String sourceType, Long sourceId) {
+        Product p = findOrThrow(productId);
+        p.setStock(p.getStock() + quantity);
+        logMovement(p, StockMovementType.PRZYJECIE, quantity, null, null, sourceType, sourceId);
     }
 
     @Transactional

@@ -20,8 +20,10 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 @Component
 @Profile("dev")
@@ -76,8 +78,14 @@ public class SalesOrderSeeder implements ApplicationRunner {
             BigDecimal net = BigDecimal.ZERO;
             BigDecimal vat = BigDecimal.ZERO;
 
+            Set<Long> usedProducts = new HashSet<>();
+
             for (int j = 0; j < lineCount; j++) {
                 Product p = allProducts.get(faker.number().numberBetween(0, allProducts.size()));
+                if (!usedProducts.add(p.getId())) {
+                    continue;
+                }
+
                 int quantity = faker.number().numberBetween(1, 11);
 
                 SalesOrderItem item = new SalesOrderItem();
@@ -91,8 +99,8 @@ public class SalesOrderSeeder implements ApplicationRunner {
                 items.save(item);
 
                 BigDecimal lineNet = p.getSalePrice().multiply(BigDecimal.valueOf(quantity));
-                BigDecimal lineVat = lineNet.multiply(p.getVatRate())
-                        .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+                BigDecimal lineVat = lineNet.multiply(BigDecimal.valueOf(p.getVatRate().getPercent()))
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
                 net = net.add(lineNet);
                 vat = vat.add(lineVat);
             }

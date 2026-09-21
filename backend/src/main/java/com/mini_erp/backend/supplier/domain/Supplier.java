@@ -32,7 +32,7 @@ public class Supplier {
     @Column(nullable = false, length = 100)
     private String city;
 
-    @Column(name = "postal_code", nullable = false, length = 10)
+    @Column(nullable = false, length = 10)
     private String postalCode;
 
     @Column(nullable = false, length = 60)
@@ -41,6 +41,6 @@ public class Supplier {
     @Column(nullable = false)
     private boolean active = true;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(insertable = false, updatable = false)
     private LocalDateTime createdAt;
 }

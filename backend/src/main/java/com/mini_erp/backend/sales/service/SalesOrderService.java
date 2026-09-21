@@ -11,7 +11,7 @@ import com.mini_erp.backend.sales.domain.SalesOrder;
 import com.mini_erp.backend.sales.domain.SalesOrderItem;
 import com.mini_erp.backend.sales.domain.SalesOrderStatus;
 import com.mini_erp.backend.sales.domain.SalesOrderStatusHistory;
-import com.mini_erp.backend.sales.mapper.SalesOrderMapper;
+import com.mini_erp.backend.shared.mappers.SalesOrderMapper;
 import com.mini_erp.backend.sales.repository.SalesOrderItemRepository;
 import com.mini_erp.backend.sales.repository.SalesOrderRepository;
 import com.mini_erp.backend.sales.repository.SalesOrderStatusHistoryRepository;
@@ -214,7 +214,7 @@ public class SalesOrderService {
         BigDecimal vat = BigDecimal.ZERO;
         for (SalesOrderItem line : items.findByOrderIdOrderById(order.getId())) {
             BigDecimal lineNet = line.getUnitPrice().multiply(BigDecimal.valueOf(line.getQuantity()));
-            BigDecimal lineVat = lineNet.multiply(line.getVatRate())
+            BigDecimal lineVat = lineNet.multiply(BigDecimal.valueOf(line.getVatRate().getPercent()))
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
             net = net.add(lineNet);
             vat = vat.add(lineVat);

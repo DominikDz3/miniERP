@@ -1,4 +1,4 @@
-package com.mini_erp.backend.catalog.mapper;
+package com.mini_erp.backend.shared.mappers;
 
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.web.dto.ProductRequest;

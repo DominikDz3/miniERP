@@ -1,6 +1,7 @@
-package com.mini_erp.backend.sales.domain;
+package com.mini_erp.backend.purchase.domain;
 
-import com.mini_erp.backend.customer.domain.Customer;
+import com.mini_erp.backend.supplier.domain.Supplier;
+import com.mini_erp.backend.warehouse.domain.Warehouse;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,9 +10,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "sales_orders")
+@Table(name = "purchase_orders")
 @Getter @Setter
-public class SalesOrder {
+public class PurchaseOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,14 +20,15 @@ public class SalesOrder {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(nullable = false)
-    private Customer customer;
+    private Supplier supplier;
 
-    @Column(nullable = false)
-    private Long receiverAddressId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(nullable = false)
+    private Warehouse warehouse;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private SalesOrderStatus status = SalesOrderStatus.NEW;
+    private PurchaseOrderStatus status = PurchaseOrderStatus.NEW;
 
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal totalNet = BigDecimal.ZERO;

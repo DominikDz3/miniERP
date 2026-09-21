@@ -1,4 +1,4 @@
-package com.mini_erp.backend.sales.domain;
+package com.mini_erp.backend.purchase.domain;
 
 import com.mini_erp.backend.catalog.domain.VatRate;
 import jakarta.persistence.*;
@@ -8,9 +8,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "sales_order_items")
+@Table(name = "purchase_order_items")
 @Getter @Setter
-public class SalesOrderItem {
+public class PurchaseOrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +32,7 @@ public class SalesOrderItem {
     private Integer quantity;
 
     @Column(nullable = false, precision = 19, scale = 4)
-    private BigDecimal unitPrice;
+    private BigDecimal purchasePrice;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)

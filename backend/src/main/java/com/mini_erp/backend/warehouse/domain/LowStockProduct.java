@@ -12,22 +12,17 @@ import org.hibernate.annotations.Immutable;
 public class LowStockProduct {
 
     @Id
-    @Column(name = "product_id")
     private Long productId;
 
     private String sku;
 
-    @Column(name = "product_name")
     private String productName;
 
     private Integer stock;
 
-    @Column(name = "min_stock")
     private Integer minStock;
 
-    @Column(name = "warehouse_id")
     private Long warehouseId;
 
-    @Column(name = "warehouse_name")
     private String warehouseName;
 }

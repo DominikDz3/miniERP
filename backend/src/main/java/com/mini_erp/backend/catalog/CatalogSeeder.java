@@ -2,6 +2,7 @@ package com.mini_erp.backend.catalog;
 
 import com.mini_erp.backend.catalog.domain.Category;
 import com.mini_erp.backend.catalog.domain.Product;
+import com.mini_erp.backend.catalog.domain.VatRate;
 import com.mini_erp.backend.catalog.repository.CategoryRepository;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.warehouse.domain.Warehouse;
@@ -74,7 +75,7 @@ public class CatalogSeeder implements ApplicationRunner {
             p.setCategory(category);
             p.setPurchasePrice(purchasePrice);
             p.setSalePrice(salePrice);
-            p.setVatRate(new BigDecimal("23.00"));
+            p.setVatRate(VatRate.VAT_23);
             p.setUnit("szt");
             p.setStock(faker.number().numberBetween(0, 200));
             p.setMinStock(faker.number().numberBetween(0, 20));

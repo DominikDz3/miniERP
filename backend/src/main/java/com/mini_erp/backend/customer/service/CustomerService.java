@@ -3,7 +3,7 @@ package com.mini_erp.backend.customer.service;
 import com.mini_erp.backend.customer.domain.Customer;
 import com.mini_erp.backend.customer.domain.PayerAddress;
 import com.mini_erp.backend.customer.domain.ReceiverAddress;
-import com.mini_erp.backend.customer.mapper.CustomerMapper;
+import com.mini_erp.backend.shared.mappers.CustomerMapper;
 import com.mini_erp.backend.customer.repository.CustomerRepository;
 import com.mini_erp.backend.customer.web.dto.AddressRequest;
 import com.mini_erp.backend.customer.web.dto.CustomerRequest;
@@ -13,8 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class CustomerService {

@@ -14,7 +14,7 @@ public class ReceiverAddress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "customer_id", nullable = false)
+    @Column(nullable = false)
     private Long customerId;
 
     @Column(nullable = false, length = 200)
@@ -23,7 +23,7 @@ public class ReceiverAddress {
     @Column(nullable = false, length = 100)
     private String city;
 
-    @Column(name = "postal_code", nullable = false, length = 10)
+    @Column(nullable = false, length = 10)
     private String postalCode;
 
     @Column(nullable = false, length = 60)
