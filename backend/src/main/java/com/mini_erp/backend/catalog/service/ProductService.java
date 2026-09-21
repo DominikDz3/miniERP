@@ -196,6 +196,13 @@ public class ProductService {
     }
 
     @Transactional
+    public void receiveForOrder(Long productId, int quantity, String sourceType, Long sourceId) {
+        Product p = findOrThrow(productId);
+        p.setStock(p.getStock() + quantity);
+        logMovement(p, StockMovementType.PRZYJECIE, quantity, null, null, sourceType, sourceId);
+    }
+
+    @Transactional
     public void returnForOrder(Long productId, int quantity, String sourceType, Long sourceId) {
         Product p = findOrThrow(productId);
         p.setStock(p.getStock() + quantity);
