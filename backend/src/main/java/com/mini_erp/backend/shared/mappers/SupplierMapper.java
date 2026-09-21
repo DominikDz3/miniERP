@@ -1,4 +1,4 @@
-package com.mini_erp.backend.supplier.mapper;
+package com.mini_erp.backend.shared.mappers;
 
 import com.mini_erp.backend.supplier.domain.Supplier;
 import com.mini_erp.backend.supplier.web.dto.*;

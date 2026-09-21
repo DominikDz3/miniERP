@@ -2,7 +2,7 @@ package com.mini_erp.backend.catalog.service;
 
 import com.mini_erp.backend.catalog.domain.Category;
 import com.mini_erp.backend.catalog.domain.Product;
-import com.mini_erp.backend.catalog.mapper.ProductMapper;
+import com.mini_erp.backend.shared.mappers.ProductMapper;
 import com.mini_erp.backend.catalog.repository.CategoryRepository;
 import com.mini_erp.backend.catalog.repository.PriceHistoryRepository;
 import com.mini_erp.backend.catalog.repository.ProductRepository;

@@ -1,7 +1,7 @@
 package com.mini_erp.backend.supplier.service;
 
 import com.mini_erp.backend.supplier.domain.Supplier;
-import com.mini_erp.backend.supplier.mapper.SupplierMapper;
+import com.mini_erp.backend.shared.mappers.SupplierMapper;
 import com.mini_erp.backend.supplier.repository.SupplierRepository;
 import com.mini_erp.backend.supplier.web.dto.*;
 import com.mini_erp.backend.shared.exception.NotFoundException;

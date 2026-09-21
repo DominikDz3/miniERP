@@ -1,4 +1,4 @@
-package com.mini_erp.backend.warehouse.mapper;
+package com.mini_erp.backend.shared.mappers;
 
 import com.mini_erp.backend.warehouse.domain.Warehouse;
 import com.mini_erp.backend.warehouse.web.dto.WarehouseRequest;

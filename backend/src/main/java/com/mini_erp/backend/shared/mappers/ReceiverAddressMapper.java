@@ -1,4 +1,4 @@
-package com.mini_erp.backend.customer.mapper;
+package com.mini_erp.backend.shared.mappers;
 
 import com.mini_erp.backend.customer.domain.ReceiverAddress;
 import com.mini_erp.backend.customer.web.dto.AddressRequest;

@@ -2,7 +2,7 @@ package com.mini_erp.backend.customer.service;
 
 import com.mini_erp.backend.customer.domain.Customer;
 import com.mini_erp.backend.customer.domain.PayerAddress;
-import com.mini_erp.backend.customer.mapper.PayerAddressMapper;
+import com.mini_erp.backend.shared.mappers.PayerAddressMapper;
 import com.mini_erp.backend.customer.repository.CustomerRepository;
 import com.mini_erp.backend.customer.repository.PayerAddressRepository;
 import com.mini_erp.backend.customer.web.dto.AddressRequest;

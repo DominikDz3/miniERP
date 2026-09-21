@@ -2,7 +2,7 @@ package com.mini_erp.backend.warehouse.service;
 
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.warehouse.domain.Warehouse;
-import com.mini_erp.backend.warehouse.mapper.WarehouseMapper;
+import com.mini_erp.backend.shared.mappers.WarehouseMapper;
 import com.mini_erp.backend.warehouse.repository.WarehouseRepository;
 import com.mini_erp.backend.warehouse.web.dto.*;
 import com.mini_erp.backend.shared.exception.NotFoundException;

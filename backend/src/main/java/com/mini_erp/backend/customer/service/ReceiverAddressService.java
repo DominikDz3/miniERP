@@ -2,7 +2,7 @@ package com.mini_erp.backend.customer.service;
 
 import com.mini_erp.backend.customer.domain.Customer;
 import com.mini_erp.backend.customer.domain.ReceiverAddress;
-import com.mini_erp.backend.customer.mapper.ReceiverAddressMapper;
+import com.mini_erp.backend.shared.mappers.ReceiverAddressMapper;
 import com.mini_erp.backend.customer.repository.CustomerRepository;
 import com.mini_erp.backend.customer.repository.ReceiverAddressRepository;
 import com.mini_erp.backend.customer.web.dto.AddressRequest;

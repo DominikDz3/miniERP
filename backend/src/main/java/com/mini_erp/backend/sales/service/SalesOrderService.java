@@ -11,7 +11,7 @@ import com.mini_erp.backend.sales.domain.SalesOrder;
 import com.mini_erp.backend.sales.domain.SalesOrderItem;
 import com.mini_erp.backend.sales.domain.SalesOrderStatus;
 import com.mini_erp.backend.sales.domain.SalesOrderStatusHistory;
-import com.mini_erp.backend.sales.mapper.SalesOrderMapper;
+import com.mini_erp.backend.shared.mappers.SalesOrderMapper;
 import com.mini_erp.backend.sales.repository.SalesOrderItemRepository;
 import com.mini_erp.backend.sales.repository.SalesOrderRepository;
 import com.mini_erp.backend.sales.repository.SalesOrderStatusHistoryRepository;

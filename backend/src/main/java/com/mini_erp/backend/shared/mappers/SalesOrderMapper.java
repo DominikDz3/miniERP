@@ -1,4 +1,4 @@
-package com.mini_erp.backend.sales.mapper;
+package com.mini_erp.backend.shared.mappers;
 
 import com.mini_erp.backend.sales.domain.SalesOrder;
 import com.mini_erp.backend.sales.domain.SalesOrderItem;
