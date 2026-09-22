@@ -8,6 +8,7 @@ import { StatusBadge } from "../components/StatusBadge";
 import { ALLOWED_TRANSITIONS, STATUS_ACTION_LABELS } from "../types/statusTransitions";
 import type { SalesOrderStatus } from "../types/sales";
 import { ApiError } from "@/shared/services/apiClient";
+import { VAT_LABEL } from "@/features/products/types/catalog";
 
 export function SalesOrderDetailsView() {
   const { id } = useParams();
@@ -119,7 +120,7 @@ export function SalesOrderDetailsView() {
                     <td className="py-2">{it.productName}</td>
                     <td className="py-2">{it.quantity}</td>
                     <td className="py-2">{it.unitPrice.toFixed(2)} zł</td>
-                    <td className="py-2">{it.vatRate}%</td>
+                    <td className="py-2">{VAT_LABEL[it.vatRate]}</td>
                     <td className="py-2">{it.lineNet.toFixed(2)} zł</td>
                   </tr>
                 ))}

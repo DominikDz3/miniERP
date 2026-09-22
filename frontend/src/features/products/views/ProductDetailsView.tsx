@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useProduct, useProductPriceHistory, useDeactivateProduct, useActivateProduct } from "../hooks/useProducts";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { ConfirmModal } from "@/shared/components/ConfirmModal";
+import { VAT_LABEL } from "../types/catalog";
 
 export function ProductDetailsView() {
   const { id } = useParams();
@@ -72,7 +73,7 @@ export function ProductDetailsView() {
           <dt className="text-gray-500">Cena sprzedaży</dt>
           <dd>{product.salePrice.toFixed(2)} zł</dd>
           <dt className="text-gray-500">VAT</dt>
-          <dd>{product.vatRate}%</dd>
+          <dd>{VAT_LABEL[product.vatRate]}</dd>
           <dt className="text-gray-500">Jednostka</dt>
           <dd>{product.unit}</dd>
           <dt className="text-gray-500">Stan</dt>

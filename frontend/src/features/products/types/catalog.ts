@@ -1,3 +1,9 @@
+export type VatRate = "VAT_23" | "VAT_8" | "VAT_5" | "VAT_0";
+
+export const VAT_LABEL: Record<VatRate, string> = {
+  VAT_23: "23%", VAT_8: "8%", VAT_5: "5%", VAT_0: "0%",
+};
+
 export interface CategoryResponse {
   id: number;
   name: string;
@@ -19,7 +25,7 @@ export interface ProductResponse {
   warehouseName: string; 
   purchasePrice: number;
   salePrice: number;
-  vatRate: number;
+  vatRate: VatRate;
   unit: string;
   stock: number;
   minStock: number;
@@ -34,7 +40,7 @@ export interface ProductRequest {
   warehouseId: number; 
   purchasePrice: number;
   salePrice: number;
-  vatRate: number;
+  vatRate: VatRate;
   unit: string;
   stock: number;
   minStock: number;
