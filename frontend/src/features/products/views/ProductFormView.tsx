@@ -23,7 +23,7 @@ export function ProductFormView() {
     formState: { errors, isSubmitting },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: { categoryId: "",warehouseId: "", vatRate: 23, unit: "szt", stock: 0, minStock: 0 },
+    defaultValues: { categoryId: "",warehouseId: "", vatRate: "VAT_23", unit: "szt", stock: 0, minStock: 0 },
   });
 
   const onSubmit = async (values: ProductFormValues) => {
@@ -114,8 +114,13 @@ export function ProductFormView() {
             {errors.salePrice && <p className="text-red-600 text-xs mt-1">{errors.salePrice.message}</p>}
           </div>
           <div>
-            <label className="block text-sm text-gray-500 mb-1">VAT %</label>
-            <input type="number" step="0.01" className={inputCls} {...register("vatRate", { valueAsNumber: true })} />
+            <label className="block text-sm text-gray-500 mb-1">VAT</label>
+            <select className={inputCls} {...register("vatRate")}>
+              <option value="VAT_23">23%</option>
+              <option value="VAT_8">8%</option>
+              <option value="VAT_5">5%</option>
+              <option value="VAT_0">0%</option>
+            </select>
           </div>
         </div>
 

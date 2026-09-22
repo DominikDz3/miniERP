@@ -1,27 +1,27 @@
 import { useParams, useNavigate } from "react-router";
 import { useState } from "react";
-import { useSalesOrder, useSalesOrderItems, useSalesOrderHistory, useSalesOrderTransition } from "../hooks/useSalesOrders";
+import { usePurchaseOrder, usePurchaseOrderItems, usePurchaseOrderHistory, usePurchaseOrderTransition } from "../hooks/usePurchaseOrders";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { ConfirmModal } from "@/shared/components/ConfirmModal";
 import { Modal } from "@/shared/components/Modal";
 import { StatusBadge } from "../components/StatusBadge";
 import { ALLOWED_TRANSITIONS, STATUS_ACTION_LABELS } from "../types/statusTransitions";
-import type { SalesOrderStatus } from "../types/sales";
-import { ApiError } from "@/shared/services/apiClient";
+import type { PurchaseOrderStatus } from "../types/purchase";
 import { VAT_LABEL } from "@/features/products/types/catalog";
+import { ApiError } from "@/shared/services/apiClient";
 
-export function SalesOrderDetailsView() {
+export function PurchaseOrderDetailsView() {
   const { id } = useParams();
   const orderId = Number(id);
   const navigate = useNavigate();
   const { hasAuthority } = useAuth();
 
-  const { data: order, isLoading, isError } = useSalesOrder(orderId);
-  const { data: items } = useSalesOrderItems(orderId);
-  const { data: history } = useSalesOrderHistory(orderId);
-  const transition = useSalesOrderTransition();
+  const { data: order, isLoading, isError } = usePurchaseOrder(orderId);
+  const { data: items } = usePurchaseOrderItems(orderId);
+  const { data: history } = usePurchaseOrderHistory(orderId);
+  const transition = usePurchaseOrderTransition();
 
-  const [confirmTarget, setConfirmTarget] = useState<SalesOrderStatus | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<PurchaseOrderStatus | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (isLoading) return <p className="text-gray-500">Ładowanie…</p>;
@@ -29,7 +29,7 @@ export function SalesOrderDetailsView() {
 
   const allowed = ALLOWED_TRANSITIONS[order.status];
 
-  const runTransition = (target: SalesOrderStatus) => {
+  const runTransition = (target: PurchaseOrderStatus) => {
     transition.mutate(
       { id: order.id, target },
       {
@@ -44,24 +44,22 @@ export function SalesOrderDetailsView() {
 
   return (
     <div className="max-w-5xl">
-      <button
-        onClick={() => navigate("/sales-orders")}
+      <button onClick={() => navigate("/purchase-orders")}
         className="text-sm text-gray-500 hover:text-gray-700 mb-4 cursor-pointer">
         ← Wróć do listy
       </button>
 
       <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-semibold">Zamówienie #{order.id}</h1>
+        <h1 className="text-2xl font-semibold">Zamówienie zakupu #{order.id}</h1>
         <StatusBadge status={order.status} />
       </div>
 
-      {hasAuthority("SALES_WRITE") && allowed.length > 0 && (
+      {hasAuthority("PURCHASE_WRITE") && allowed.length > 0 && (
         <div className="flex gap-2 mb-6">
           {allowed.map((target) => {
             const danger = target === "CANCELLED";
             return (
-              <button
-                key={target}
+              <button key={target}
                 onClick={() => setConfirmTarget(target)}
                 disabled={transition.isPending}
                 className={
@@ -78,15 +76,14 @@ export function SalesOrderDetailsView() {
       )}
 
       <div className="grid grid-cols-3 gap-6">
-        {/* LEWA: dane + pozycje */}
         <div className="col-span-2 space-y-6">
           <section className="bg-white rounded-lg shadow p-5">
             <h2 className="font-medium text-gray-600 mb-3">Dane</h2>
             <dl className="grid grid-cols-2 gap-y-2 text-sm">
-              <dt className="text-gray-500">Klient</dt>
-              <dd>{order.customerName}</dd>
-              <dt className="text-gray-500">Adres dostawy</dt>
-              <dd>{order.receiverAddress}</dd>
+              <dt className="text-gray-500">Dostawca</dt>
+              <dd>{order.supplierName}</dd>
+              <dt className="text-gray-500">Magazyn docelowy</dt>
+              <dd>{order.warehouseName}</dd>
               <dt className="text-gray-500">Utworzył</dt>
               <dd>{order.createdBy}</dd>
               <dt className="text-gray-500">Data</dt>
@@ -108,7 +105,7 @@ export function SalesOrderDetailsView() {
                   <th className="py-2 font-medium text-gray-500">SKU</th>
                   <th className="py-2 font-medium text-gray-500">Produkt</th>
                   <th className="py-2 font-medium text-gray-500">Ilość</th>
-                  <th className="py-2 font-medium text-gray-500">Cena jedn.</th>
+                  <th className="py-2 font-medium text-gray-500">Cena zakupu</th>
                   <th className="py-2 font-medium text-gray-500">VAT</th>
                   <th className="py-2 font-medium text-gray-500">Wartość netto</th>
                 </tr>
@@ -119,7 +116,7 @@ export function SalesOrderDetailsView() {
                     <td className="py-2 font-mono text-xs">{it.sku}</td>
                     <td className="py-2">{it.productName}</td>
                     <td className="py-2">{it.quantity}</td>
-                    <td className="py-2">{it.unitPrice.toFixed(2)} zł</td>
+                    <td className="py-2">{it.purchasePrice.toFixed(2)} zł</td>
                     <td className="py-2">{VAT_LABEL[it.vatRate]}</td>
                     <td className="py-2">{it.lineNet.toFixed(2)} zł</td>
                   </tr>
@@ -129,7 +126,6 @@ export function SalesOrderDetailsView() {
           </section>
         </div>
 
-        {/* PRAWA: historia statusów */}
         <div className="col-span-1">
           <section className="bg-white rounded-lg shadow p-5">
             <h2 className="font-medium text-gray-600 mb-3">Historia statusów</h2>
@@ -143,9 +139,7 @@ export function SalesOrderDetailsView() {
                     <span className="text-gray-400">→</span>
                     <StatusBadge status={h.toStatus} />
                   </div>
-                  <div className="text-gray-500 mt-1">
-                    {new Date(h.changedAt).toLocaleString("pl-PL")}
-                  </div>
+                  <div className="text-gray-500 mt-1">{new Date(h.changedAt).toLocaleString("pl-PL")}</div>
                   <div className="text-gray-400">{h.changedBy}</div>
                 </li>
               ))}
@@ -158,8 +152,8 @@ export function SalesOrderDetailsView() {
         open={confirmTarget !== null}
         title="Zmiana statusu"
         message={
-          confirmTarget === "PROCESSING"
-            ? "Realizacja wyda towar z magazynu i zmniejszy stany. Kontynuować?"
+          confirmTarget === "RECEIVED"
+            ? "Przyjęcie dostawy zwiększy stany magazynowe. Kontynuować?"
             : confirmTarget === "CANCELLED"
             ? "Zamówienie zostanie anulowane."
             : `Zmienić status na „${confirmTarget ? STATUS_ACTION_LABELS[confirmTarget] : ""}"?`
@@ -171,21 +165,14 @@ export function SalesOrderDetailsView() {
         onCancel={() => setConfirmTarget(null)}
       />
 
-      <Modal
-        open={errorMessage !== null}
-        title="Nie można wykonać operacji"
-        onClose={() => setErrorMessage(null)}
-      >
+      <Modal open={errorMessage !== null} title="Nie można wykonać operacji" onClose={() => setErrorMessage(null)}>
         <div className="flex gap-3 mb-5">
           <span className="text-red-500 text-2xl leading-none">⚠</span>
           <p className="text-sm text-gray-800">{errorMessage}</p>
         </div>
         <div className="flex justify-end">
-          <button
-            onClick={() => setErrorMessage(null)}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">
-            OK
-          </button>
+          <button onClick={() => setErrorMessage(null)}
+            className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">OK</button>
         </div>
       </Modal>
     </div>

@@ -30,7 +30,7 @@ import java.util.Set;
 @Order(6)
 public class PurchaseOrderSeeder implements ApplicationRunner {
 
-    private static final int ORDER_COUNT = 12;
+    private static final int ORDER_COUNT = 30;
 
     private final PurchaseOrderRepository orders;
     private final PurchaseOrderItemRepository items;

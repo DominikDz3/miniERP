@@ -1,3 +1,5 @@
+import type { VatRate } from "@/features/products/types/catalog";
+
 export type SalesOrderStatus =
   | "NEW"
   | "CONFIRMED"
@@ -27,7 +29,7 @@ export interface SalesOrderItemResponse {
   productName: string;
   quantity: number;
   unitPrice: number;
-  vatRate: number;
+  vatRate: VatRate;
   lineNet: number;
 }
 

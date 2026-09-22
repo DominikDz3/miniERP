@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-import { useProducts } from "@/features/products/hooks/useProducts";
+import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 
 interface Props {
-  selectedLabel: string;  
-  warehouseId?: number | null;            
-  onSelect: (id: number, label: string) => void;
+  value: number | null;
+  selectedName: string;
+  onSelect: (id: number, name: string) => void;
   error?: string;
 }
 
 const inputCls = "w-full border rounded px-3 py-2";
 
-export function ProductAutocomplete({ selectedLabel, warehouseId, onSelect, error }: Props) {
+export function SupplierAutocomplete({ value, selectedName, onSelect, error }: Props) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
   const [open, setOpen] = useState(false);
@@ -20,10 +20,9 @@ export function ProductAutocomplete({ selectedLabel, warehouseId, onSelect, erro
     return () => clearTimeout(t);
   }, [query]);
 
-  const { data, isFetching } = useProducts({
+  const { data, isFetching } = useSuppliers({
     search: debounced.length >= 1 ? debounced : undefined,
     active: true,
-    warehouseId: warehouseId ?? undefined,
     page: 0,
     size: 10,
   });
@@ -36,7 +35,7 @@ export function ProductAutocomplete({ selectedLabel, warehouseId, onSelect, erro
     <div className="relative">
       <input
         className={inputCls}
-        placeholder={selectedLabel || "Szukaj produktu (SKU / nazwa)…"}
+        placeholder={value ? selectedName : "Szukaj dostawcy…"}
         value={query}
         onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
@@ -46,18 +45,17 @@ export function ProductAutocomplete({ selectedLabel, warehouseId, onSelect, erro
 
       {showList && (
         <ul className="absolute z-10 w-full bg-white border rounded mt-1 shadow max-h-60 overflow-auto">
-          {results.map((p) => (
+          {results.map((s) => (
             <li
-              key={p.id}
+              key={s.id}
               onMouseDown={() => {
-                onSelect(p.id, `${p.sku} — ${p.name}`);
+                onSelect(s.id, s.name);
                 setQuery("");
                 setOpen(false);
               }}
               className="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
             >
-              {p.sku} — {p.name}
-              <span className="text-gray-400"> ({p.warehouseName}, stan {p.stock})</span>
+              {s.name}{s.nip ? ` · NIP ${s.nip}` : ""}
             </li>
           ))}
         </ul>
