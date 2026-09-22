@@ -34,6 +34,9 @@ public class SalesOrderItem {
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal unitPrice;
 
+    @Column(precision = 19, scale = 4)
+    private BigDecimal purchasePrice;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private VatRate vatRate;
