@@ -23,7 +23,7 @@ public interface ReportRepository extends JpaRepository<SalesOrder, Long> {
         from purchase_orders o
         where o.status = 'RECEIVED'
           and o.created_at >= :from and o.created_at <= :to
-        group by date_trunc(:granularity, o.created_at)
+        group by 1
         order by 1
         """, nativeQuery = true)
     List<Object[]> purchaseReport(@Param("from") LocalDateTime from,

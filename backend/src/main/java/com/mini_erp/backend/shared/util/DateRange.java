@@ -2,6 +2,7 @@ package com.mini_erp.backend.shared.util;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public final class DateRange {
 
@@ -12,6 +13,6 @@ public final class DateRange {
     }
 
     public static LocalDateTime to(LocalDate date) {
-        return (date != null) ? date.atTime(23, 59, 59) : LocalDateTime.now();
+        return (date != null) ? date.atTime(LocalTime.MAX) : LocalDateTime.now();
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,7 +30,7 @@ public class ReportService {
     public List<SalesReportRow> salesReport(LocalDate from, LocalDate to, String granularity) {
         return reports.salesReport(DateRange.from(from), DateRange.to(to), granularity).stream()
                 .map(r -> new SalesReportRow(
-                        ((Timestamp) r[0]).toLocalDateTime(),
+                        (LocalDateTime) r[0],
                         ((Number) r[1]).longValue(),
                         (BigDecimal) r[2],
                         (BigDecimal) r[3]))
@@ -39,7 +40,7 @@ public class ReportService {
     public List<PurchaseReportRow> purchaseReport(LocalDate from, LocalDate to, String granularity) {
         return reports.purchaseReport(DateRange.from(from), DateRange.to(to), granularity).stream()
                 .map(r -> new PurchaseReportRow(
-                        ((Timestamp) r[0]).toLocalDateTime(),
+                        (LocalDateTime) r[0],
                         ((Number) r[1]).longValue(),
                         (BigDecimal) r[2],
                         (BigDecimal) r[3]))
