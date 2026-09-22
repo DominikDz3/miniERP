@@ -116,6 +116,7 @@ public class SalesOrderService {
             item.setSku(p.getSku());
             item.setProductName(p.getName());
             item.setUnitPrice(p.getSalePrice());
+            item.setPurchasePrice(p.getPurchasePrice());
             item.setVatRate(p.getVatRate());
             item.setQuantity(ir.quantity());
             items.save(item);

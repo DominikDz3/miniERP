@@ -94,6 +94,7 @@ public class SalesOrderSeeder implements ApplicationRunner {
                 item.setSku(p.getSku());
                 item.setProductName(p.getName());
                 item.setUnitPrice(p.getSalePrice());
+                item.setPurchasePrice(p.getPurchasePrice());
                 item.setVatRate(p.getVatRate());
                 item.setQuantity(quantity);
                 items.save(item);

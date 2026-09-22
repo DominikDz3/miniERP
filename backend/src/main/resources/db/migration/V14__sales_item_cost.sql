@@ -1,0 +1,1 @@
+alter table sales_order_items add column purchase_price numeric(19,4);
