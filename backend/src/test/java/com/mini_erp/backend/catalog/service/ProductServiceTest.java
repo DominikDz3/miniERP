@@ -2,6 +2,7 @@ package com.mini_erp.backend.catalog.service;
 
 import com.mini_erp.backend.catalog.domain.Category;
 import com.mini_erp.backend.catalog.domain.Product;
+import com.mini_erp.backend.catalog.domain.VatRate;
 import com.mini_erp.backend.shared.mappers.ProductMapper;
 import com.mini_erp.backend.catalog.repository.CategoryRepository;
 import com.mini_erp.backend.catalog.repository.PriceHistoryRepository;
@@ -62,7 +63,7 @@ class ProductServiceTest {
         return new ProductRequest(
                 "SKU-1", "Wiertarka", "opis", 1L, 2L,
                 new BigDecimal("100.00"), new BigDecimal("150.00"),
-                new BigDecimal("23.00"), "szt", 5, 1);
+                VatRate.VAT_23, "szt", 5, 1);
     }
 
     // create
