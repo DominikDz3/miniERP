@@ -45,6 +45,6 @@ public interface DashboardRepository extends JpaRepository<SalesOrder, Long> {
     BigDecimal warehouseValue();
 
     // products below minimum
-    @Query(value = "select count(*) from low_Stock_products", nativeQuery = true)
+    @Query("select count(p) from Product p where p.active = true and p.stock <= p.minStock")
     long countLowStock();
 }
