@@ -37,6 +37,16 @@ export function AppLayout() {
       <aside className="w-56 bg-gray-800 text-gray-100 flex flex-col">
         <div className="p-4 text-lg font-semibold border-b border-gray-700">MiniERP</div>
         <nav className="flex-1 p-2 space-y-1">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `block px-3 py-2 rounded ${isActive ? "bg-gray-700" : "hover:bg-gray-700"}`
+            }
+          >
+            Dashboard
+          </NavLink>
+
           {visible.map((n) => {
             const inSection = location.pathname.startsWith(n.path);
             const childItems = n.children?.filter((c) => authorities.includes(c.authority)) ?? [];

@@ -1,10 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { AppLayout } from "./core/layouts/AppLayout";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
-
-import {
-    DashboardPage, AuditPage, ForbiddenPage,
-} from "./pages/modules/Placeholders";
+import { AuditPage, ForbiddenPage } from "./pages/modules/Placeholders";
 import { authRoutes } from "./features/auth/routes";
 import { customerRoutes } from "./features/customers/routes";
 import { productRoutes } from "./features/products/route";
@@ -13,6 +10,7 @@ import { warehousesRoutes } from "./features/warehouses/route";
 import { salesRoutes } from "./features/sales/route";
 import { purchaseRoutes } from "./features/purchases/route";
 import { reportRoutes } from "./features/reports/route";
+import { DashboardView } from "./features/dashboard/views/DashboardView";
 
 export const router = createBrowserRouter([
     // public
@@ -25,7 +23,7 @@ export const router = createBrowserRouter([
             {
                 element: <AppLayout />,
                 children: [
-                    { path: "/", element: <DashboardPage /> },
+                    { path: "/", element: <DashboardView /> },
                     { path: "/403", element: <ForbiddenPage /> },
 
                     // feature routes
