@@ -24,7 +24,7 @@ public class AppUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = users.findByUsername(username)
+        var user = users.findByUsername(username.trim().toLowerCase())
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika: " + username));
 
         Set<GrantedAuthority> authorities = new HashSet<>();

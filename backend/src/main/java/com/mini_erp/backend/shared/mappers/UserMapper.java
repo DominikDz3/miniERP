@@ -9,6 +9,6 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
 
     @Mapping(target = "roleName", source = "role.name")
-    @Mapping(target = "fullName", source = "full_name")
+    @Mapping(target = "fullName")
     UserResponse toResponse(User user);
 }

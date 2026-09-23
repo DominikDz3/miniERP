@@ -41,15 +41,16 @@ public class UserService {
 
     @Transactional
     public UserResponse create(UserCreateRequest req) {
-        if (users.existsByUsername(req.username())) {
+        String username = req.username().trim().toLowerCase();
+        if (users.existsByUsername(username)) {
             throw new IllegalArgumentException("Nazwa użytkownika już istnieje: " + req.username());
         }
         Role role = findRoleOrThrow(req.roleName());
 
         User u = new User();
-        u.setUsername(req.username());
+        u.setUsername(username);
         u.setPassword(encoder.encode(req.password()));
-        u.setFull_name(req.fullName());
+        u.setFullName(req.fullName());
         u.setRole(role);
         u.setEnabled(true);
         return mapper.toResponse(users.save(u));
@@ -58,7 +59,7 @@ public class UserService {
     @Transactional
     public UserResponse update(Long id, UserUpdateRequest req) {
         User u = findOrThrow(id);
-        u.setFull_name(req.fullName());
+        u.setFullName(req.fullName());
         u.setRole(findRoleOrThrow(req.roleName()));
         return mapper.toResponse(users.save(u));
     }

@@ -55,7 +55,7 @@ public class AdminBootstrap implements ApplicationRunner {
         User user = new User();
         user.setUsername(username);
         user.setPassword(encoder.encode(rawPassword));
-        user.setFull_name(fullName);
+        user.setFullName(fullName);
         user.setEnabled(true);
         user.setRole(role);
         users.save(user);

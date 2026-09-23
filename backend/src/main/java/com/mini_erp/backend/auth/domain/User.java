@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -24,7 +22,7 @@ public class User {
     private String password;
 
     @Column(nullable = false, length = 120)
-    private String full_name;
+    private String fullName;
 
     @Column(nullable = false)
     private boolean enabled = true;
