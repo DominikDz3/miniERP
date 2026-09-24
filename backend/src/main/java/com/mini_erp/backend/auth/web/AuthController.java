@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
@@ -36,13 +37,19 @@ public class AuthController {
 
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-        var authentication = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-        var user = (UserDetails) authentication.getPrincipal();
+        String username = request.username().trim().toLowerCase();
+        try {
+            var authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+            var user = (UserDetails) authentication.getPrincipal();
 
-        auditService.log("LOGIN", null, null, request.username().trim().toLowerCase());
-        response.addCookie(refreshCookie(jwtService.generateRefreshToken(user), REFRESH_MAX_AGE));
-        return new LoginResponse(jwtService.generateToken(user));
+            auditService.log("LOGIN_SUCCESS", null, null, "Zalogowano: " + username, username);
+            response.addCookie(refreshCookie(jwtService.generateRefreshToken(user), REFRESH_MAX_AGE));
+            return new LoginResponse(jwtService.generateToken(user));
+        } catch (AuthenticationException e) {
+            auditService.log("LOGIN_FAILED", null, null, "Nieudane logowanie: " + username);
+            throw e;
+        }
     }
 
     @PostMapping("/refresh")

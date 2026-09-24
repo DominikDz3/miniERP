@@ -42,7 +42,7 @@ public class SupplierService {
         Supplier s = mapper.toEntity(req);
         applyCountryDefault(s);
         Supplier saved = suppliers.save(s);
-        auditService.log("CREATE", "SUPPLIER", saved.getId());
+        auditService.log("CREATE", "SUPPLIER", saved.getId(), "Utworzono dostawcę: " + saved.getName());
         return mapper.toResponse(saved);
     }
 
@@ -51,7 +51,7 @@ public class SupplierService {
         Supplier s = findOrThrow(id);
         mapper.update(req, s);
         applyCountryDefault(s);
-        auditService.log("UPDATE", "SUPPLIER", s.getId());
+        auditService.log("UPDATE", "SUPPLIER", s.getId(), "Zaktualizowano dostawcę: " + s.getName());
         return mapper.toResponse(s);
     }
 
@@ -60,13 +60,15 @@ public class SupplierService {
         Supplier s = findOrThrow(id);
         s.setActive(true);
         suppliers.save(s);
-        auditService.log("ACTIVATE", "SUPPLIER", id);
+        auditService.log("ACTIVATE", "SUPPLIER", id, "Aktywowano dostawcę: " + s.getName());
     }
 
     @Transactional
     public void deactivate(Long id) {
-        findOrThrow(id).setActive(false);
-        auditService.log("DEACTIVATE", "SUPPLIER", id);
+        Supplier s = findOrThrow(id);
+        s.setActive(false);
+        suppliers.save(s);
+        auditService.log("DEACTIVATE", "SUPPLIER", id, "Dezaktywowano dostawcę" + s.getName());
     }
 
     private Supplier findOrThrow(Long id) {

@@ -29,17 +29,18 @@ public class AuditService {
         return repo.search(action, entityType, from, to, pageable).map(mapper::toResponse);
     }
 
-    public void log(String action, String entityType, Long entityId, String username) {
+    public void log(String action, String entityType, Long entityId, String details, String username) {
         AuditLog a = new AuditLog();
         a.setAction(action);
         a.setEntityType(entityType);
         a.setEntityId(entityId);
+        a.setDetails(details);
         a.setPerformedBy(username);
         repo.save(a);
     }
 
-    public void log(String action, String entityType, Long entityId) {
-        log(action, entityType, entityId, currentUsername());
+    public void log(String action, String entityType, Long entityId, String details) {
+        log(action, entityType, entityId, details, currentUsername());
     }
 
     private String currentUsername() {

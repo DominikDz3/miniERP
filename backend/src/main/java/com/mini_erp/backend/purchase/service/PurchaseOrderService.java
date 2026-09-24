@@ -138,7 +138,7 @@ public class PurchaseOrderService {
 
         recomputeTotals(order);
         logStatusChange(order.getId(), null, PurchaseOrderStatus.NEW);
-        auditService.log("CREATE", "PURCHASE_ORDER", order.getId());
+        auditService.log("CREATE", "PURCHASE_ORDER", order.getId(), "Utworzono zamówienie zakupu do: " + supplier.getName());
         return mapper.toResponse(orders.save(order));
     }
 
@@ -160,10 +160,11 @@ public class PurchaseOrderService {
                     "PURCHASE_ORDER",
                     order.getId());
         }
-        logStatusChange(id, order.getStatus(), PurchaseOrderStatus.RECEIVED);
+        PurchaseOrderStatus old = order.getStatus();
+        logStatusChange(id, old, PurchaseOrderStatus.RECEIVED);
         order.setStatus(PurchaseOrderStatus.RECEIVED);
         orders.save(order);
-        auditService.log("STATUS_CHANGE", "PURCHASE_ORDER", id);
+        auditService.log("STATUS_CHANGE", "PURCHASE_ORDER", id, "Status: " + old.label() + " → " + PurchaseOrderStatus.RECEIVED.label());
     }
 
     @Transactional
@@ -176,10 +177,11 @@ public class PurchaseOrderService {
 
     private void changeStatus(PurchaseOrder order, PurchaseOrderStatus target) {
         requireTransition(order.getStatus(), target);
-        logStatusChange(order.getId(), order.getStatus(), target);
+        PurchaseOrderStatus old = order.getStatus();
+        logStatusChange(order.getId(), old, target);
         order.setStatus(target);
         orders.save(order);
-        auditService.log("STATUS_CHANGE", "PURCHASE_ORDER", order.getId());   // <<< dodaj
+        auditService.log("STATUS_CHANGE", "PURCHASE_ORDER", order.getId(), "Status: " + old.label() + " → " + target.label());
     }
 
     private void requireTransition(PurchaseOrderStatus from, PurchaseOrderStatus to) {

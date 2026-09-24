@@ -58,7 +58,7 @@ public class CustomerService {
         }
 
         Customer c = customers.save(mapper.toEntity(req));
-        auditService.log("CREATE", "CUSTOMER", c.getId());
+        auditService.log("CREATE", "CUSTOMER", c.getId(), "Utworzono klienta: " + c.getName());
 
         PayerAddress firstPayer = null;
         for (AddressRequest ar : req.payerAddresses()) {
@@ -81,7 +81,7 @@ public class CustomerService {
         Customer c = findOrThrow(id);
         mapper.updateScalars(req, c);
         Customer saved = customers.save(c);
-        auditService.log("UPDATE", "CUSTOMER", saved.getId());
+        auditService.log("UPDATE", "CUSTOMER", saved.getId(), "Zaktualizowano klienta: " + saved.getName());
         return mapper.toResponse(saved);
     }
 
@@ -90,7 +90,7 @@ public class CustomerService {
         Customer c = findOrThrow(id);
         c.setActive(true);
         customers.save(c);
-        auditService.log("ACTIVATE", "CUSTOMER", id);
+        auditService.log("ACTIVATE", "CUSTOMER", id, "Aktywowano klienta");
     }
 
     @Transactional
@@ -98,7 +98,7 @@ public class CustomerService {
         Customer c = findOrThrow(id);
         c.setActive(false);
         customers.save(c);
-        auditService.log("DEACTIVATE", "CUSTOMER", id);
+        auditService.log("DEACTIVATE", "CUSTOMER", id, "Dezaktywowano klienta");
     }
 
     private Customer findOrThrow(Long id) {

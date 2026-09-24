@@ -23,6 +23,9 @@ public class AuditLog {
 
     private Long entityId;
 
+    @Column(length = 255)
+    private String details;
+
     @Column(nullable = false, length = 100)
     private String performedBy;
 

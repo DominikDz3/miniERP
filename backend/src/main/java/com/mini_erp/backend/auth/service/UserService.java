@@ -57,7 +57,7 @@ public class UserService {
         u.setRole(role);
         u.setEnabled(true);
         User saved = users.save(u);
-        auditService.log("CREATE", "USER", saved.getId());
+        auditService.log("CREATE", "USER", saved.getId(), "Utworzono użytkownika: " + saved.getUsername());
         return mapper.toResponse(saved);
     }
 
@@ -67,7 +67,7 @@ public class UserService {
         u.setFullName(req.fullName());
         u.setRole(findRoleOrThrow(req.roleName()));
         User saved = users.save(u);
-        auditService.log("UPDATE", "USER", saved.getId());
+        auditService.log("UPDATE", "USER", saved.getId(), "Zaktualizowano użytkownika: " + saved.getUsername());
         return mapper.toResponse(saved);
     }
 
@@ -76,7 +76,7 @@ public class UserService {
         User u = findOrThrow(id);
         u.setPassword(encoder.encode(req.newPassword()));
         users.save(u);
-        auditService.log("PASSWORD_RESET", "USER", id);
+        auditService.log("PASSWORD_RESET", "USER", id, "Zresetowano hasło dla użytkownika: " + u.getUsername());
     }
 
     @Transactional
@@ -84,7 +84,7 @@ public class UserService {
         User u = findOrThrow(id);
         u.setEnabled(true);
         users.save(u);
-        auditService.log("ACTIVATE", "USER", id);
+        auditService.log("ACTIVATE", "USER", id, "Aktywowano użytkownika: " + u.getUsername());
     }
 
     @Transactional
@@ -95,7 +95,7 @@ public class UserService {
         }
         u.setEnabled(false);
         users.save(u);
-        auditService.log("DEACTIVATE", "USER", id);
+        auditService.log("DEACTIVATE", "USER", id, "Dezaktywowano użytkownika: " + u.getUsername());
     }
 
     // helpers

@@ -86,7 +86,7 @@ public class ProductService {
         p.setCategory(findCategoryOrThrow(req.categoryId()));
         p.setWarehouse(findWarehouseOrThrow(req.warehouseId()));
         Product saved = products.save(p);
-        auditService.log("CREATE", "PRODUCT", saved.getId());
+        auditService.log("CREATE", "PRODUCT", saved.getId(), "Utworzono produkt: " + saved.getSku() + " - " + saved.getName());
         return mapper.toResponse(saved);
     }
 
@@ -97,7 +97,7 @@ public class ProductService {
         p.setCategory(findCategoryOrThrow(req.categoryId()));
         p.setWarehouse(findWarehouseOrThrow(req.warehouseId()));
         Product saved = products.save(p);
-        auditService.log("UPDATE", "PRODUCT", saved.getId());
+        auditService.log("UPDATE", "PRODUCT", saved.getId(), "Zaktualizowano produkt: " + saved.getName());
         return mapper.toResponse(saved);
     }
 
@@ -165,7 +165,7 @@ public class ProductService {
         Product p = findOrThrow(id);
         p.setActive(true);
         products.save(p);
-        auditService.log("ACTIVATE", "PRODUCT", id);
+        auditService.log("ACTIVATE", "PRODUCT", id, "Aktywowano produkt: " + p.getName());
     }
 
     @Transactional
@@ -173,7 +173,7 @@ public class ProductService {
         Product p = findOrThrow(id);
         p.setActive(false);
         products.save(p);
-        auditService.log("DEACTIVATE", "PRODUCT", id);
+        auditService.log("DEACTIVATE", "PRODUCT", id, "Dezaktywowano produkt: " + p.getName());
     }
 
     // helpers
@@ -239,7 +239,9 @@ public class ProductService {
         m.setSourceId(sourceId);
         m.setPerformedBy(currentUsername());
         stockMovements.save(m);
-        auditService.log("STOCK_MOVEMENT", "PRODUCT", p.getId());
+        auditService.log("STOCK_MOVEMENT",
+                "PRODUCT", p.getId(),
+                "Wykonano ruch: " + type + " " + quantity + " szt: " + p.getName());
     }
 
     private String currentUsername() {

@@ -45,7 +45,7 @@ public class WarehouseService {
         Warehouse w = mapper.toEntity(req);
         applyCountryDefault(w);
         Warehouse saved = warehouses.save(w);
-        auditService.log("CREATE", "WAREHOUSE", saved.getId());
+        auditService.log("CREATE", "WAREHOUSE", saved.getId(), "Utworzono magazyn: " + saved.getName());
         return mapper.toResponse(saved);
     }
 
@@ -54,14 +54,16 @@ public class WarehouseService {
         Warehouse w = findOrThrow(id);
         mapper.update(req, w);
         applyCountryDefault(w);
-        auditService.log("UPDATE", "WAREHOUSE", id);
+        auditService.log("UPDATE", "WAREHOUSE", id, "Zaktualizowano magazyn: " + w.getName());
         return mapper.toResponse(w);
     }
 
     @Transactional
     public void activate(Long id) {
-        findOrThrow(id).setActive(true);
-        auditService.log("ACTIVATE", "WAREHOUSE", id);
+        Warehouse w = findOrThrow(id);
+        w.setActive(true);
+        warehouses.save(w);
+        auditService.log("ACTIVATE", "WAREHOUSE", id, "Aktywowano magazyn: " + w.getName());
     }
 
     @Transactional
@@ -73,7 +75,7 @@ public class WarehouseService {
                     "Nie można dezaktywować magazynu z aktywnymi produktami. Najpierw przenieś lub dezaktywuj towar");
         }
         w.setActive(false);
-        auditService.log("DEACTIVATE", "WAREHOUSE", id);
+        auditService.log("DEACTIVATE", "WAREHOUSE", id, "Dezaktywowano magazyn: " + w.getName());
     }
 
     private Warehouse findOrThrow(Long id) {

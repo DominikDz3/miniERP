@@ -129,7 +129,7 @@ public class SalesOrderService {
         recomputeTotals(order);
         orders.save(order);
         logStatusChange(order.getId(), null, SalesOrderStatus.NEW);
-        auditService.log("CREATE", "SALES_ORDER", order.getId());
+        auditService.log("CREATE", "SALES_ORDER", order.getId(), "Utworzono zamówienie sprzedaży dla: " + customer.getName());
         return mapper.toResponse(order, formatAddress(order.getReceiverAddressId()));
     }
 
@@ -144,10 +144,11 @@ public class SalesOrderService {
                         "Za mało towaru: " + p.getName() + ". Dostępne " + p.getStock() + ", zamówiono " + line.getQuantity());
             }
         }
-        logStatusChange(id, order.getStatus(), SalesOrderStatus.CONFIRMED);
+        SalesOrderStatus old = order.getStatus();
+        logStatusChange(id, old, SalesOrderStatus.CONFIRMED);
         order.setStatus(SalesOrderStatus.CONFIRMED);
         orders.save(order);
-        auditService.log("STATUS_CHANGE", "SALES_ORDER", id);
+        auditService.log("STATUS_CHANGE", "SALES_ORDER", id, "Status: " + old.label() + " → " + SalesOrderStatus.CONFIRMED.label());
     }
 
     @Transactional
@@ -158,12 +159,14 @@ public class SalesOrderService {
             productService.issueForOrder(line.getProductId(), line.getQuantity(),
                     "SALES_ORDER", order.getId());
         }
-        logStatusChange(id, order.getStatus(), SalesOrderStatus.PROCESSING);
+        SalesOrderStatus old = order.getStatus();
+        logStatusChange(id, old, SalesOrderStatus.PROCESSING);
         order.setStatus(SalesOrderStatus.PROCESSING);
         orders.save(order);
-        auditService.log("STATUS_CHANGE", "SALES_ORDER", id);
+        auditService.log("STATUS_CHANGE", "SALES_ORDER", id, "Status: " + old.label() + " → " + SalesOrderStatus.PROCESSING.label());
     }
 
+    @Transactional
     public void ready(Long id) { changeStatus(findOrThrow(id), SalesOrderStatus.READY); }
 
     @Transactional
@@ -177,10 +180,11 @@ public class SalesOrderService {
                         "SALES_ORDER", order.getId());
             }
         }
-        logStatusChange(id, order.getStatus(), SalesOrderStatus.CANCELLED);
+        SalesOrderStatus old = order.getStatus();
+        logStatusChange(id, old, SalesOrderStatus.CANCELLED);
         order.setStatus(SalesOrderStatus.CANCELLED);
         orders.save(order);
-        auditService.log("STATUS_CHANGE", "SALES_ORDER", id);
+        auditService.log("STATUS_CHANGE", "SALES_ORDER", id, "Status: " + old.label() + " → " + SalesOrderStatus.CANCELLED.label());
     }
 
     @Transactional
@@ -201,10 +205,11 @@ public class SalesOrderService {
 
     private void changeStatus(SalesOrder order, SalesOrderStatus target) {
         requireTransition(order.getStatus(), target);
-        logStatusChange(order.getId(), order.getStatus(), target);
+        SalesOrderStatus old = order.getStatus();
+        logStatusChange(order.getId(), old, target);
         order.setStatus(target);
         orders.save(order);
-        auditService.log("STATUS_CHANGE", "SALES_ORDER", order.getId());
+        auditService.log("STATUS_CHANGE", "SALES_ORDER", order.getId(), "Status: " + old.label() + " → " + target.label());
     }
 
     private void requireTransition(SalesOrderStatus from, SalesOrderStatus to) {
@@ -237,7 +242,7 @@ public class SalesOrderService {
     private void logStatusChange(Long orderId, SalesOrderStatus from, SalesOrderStatus to) {
         SalesOrderStatusHistory h = new SalesOrderStatusHistory();
         h.setOrderId(orderId);
-        h.setFromStatus(from);   // null przy utworzeniu
+        h.setFromStatus(from);
         h.setToStatus(to);
         h.setChangedBy(currentUsername());
         statusHistory.save(h);
