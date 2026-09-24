@@ -1,5 +1,6 @@
 package com.mini_erp.backend.purchase.service;
 
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.catalog.service.ProductService;
@@ -45,6 +46,7 @@ public class PurchaseOrderService {
     private final WarehouseRepository warehouses;
     private final ProductRepository products;
     private final ProductService productService;
+    private final AuditService auditService;
 
     public PurchaseOrderService(PurchaseOrderRepository orders,
                                 PurchaseOrderItemRepository items,
@@ -53,7 +55,8 @@ public class PurchaseOrderService {
                                 SupplierRepository suppliers,
                                 WarehouseRepository warehouses,
                                 ProductRepository products,
-                                ProductService productService) {
+                                ProductService productService,
+                                AuditService auditService) {
         this.orders = orders;
         this.items = items;
         this.statusHistory = statusHistory;
@@ -62,6 +65,7 @@ public class PurchaseOrderService {
         this.warehouses = warehouses;
         this.products = products;
         this.productService = productService;
+        this.auditService = auditService;
     }
 
     private static final Map<PurchaseOrderStatus, Set<PurchaseOrderStatus>> ALLOWED = Map.of(
@@ -134,6 +138,7 @@ public class PurchaseOrderService {
 
         recomputeTotals(order);
         logStatusChange(order.getId(), null, PurchaseOrderStatus.NEW);
+        auditService.log("CREATE", "PURCHASE_ORDER", order.getId());
         return mapper.toResponse(orders.save(order));
     }
 
@@ -158,6 +163,7 @@ public class PurchaseOrderService {
         logStatusChange(id, order.getStatus(), PurchaseOrderStatus.RECEIVED);
         order.setStatus(PurchaseOrderStatus.RECEIVED);
         orders.save(order);
+        auditService.log("STATUS_CHANGE", "PURCHASE_ORDER", id);
     }
 
     @Transactional
@@ -173,6 +179,7 @@ public class PurchaseOrderService {
         logStatusChange(order.getId(), order.getStatus(), target);
         order.setStatus(target);
         orders.save(order);
+        auditService.log("STATUS_CHANGE", "PURCHASE_ORDER", order.getId());   // <<< dodaj
     }
 
     private void requireTransition(PurchaseOrderStatus from, PurchaseOrderStatus to) {

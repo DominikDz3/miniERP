@@ -1,5 +1,6 @@
 package com.mini_erp.backend.sales.service;
 
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.catalog.service.ProductService;
@@ -41,6 +42,7 @@ public class SalesOrderService {
     private final ProductService productService;
     private final ReceiverAddressRepository receiverAddresses;
     private final SalesOrderStatusHistoryRepository statusHistory;
+    private final AuditService auditService;
 
     public SalesOrderService(SalesOrderRepository orders,
                              SalesOrderItemRepository items,
@@ -49,7 +51,8 @@ public class SalesOrderService {
                              ProductRepository products,
                              ProductService productService,
                              ReceiverAddressRepository receiverAddresses,
-                             SalesOrderStatusHistoryRepository statusHistory) {
+                             SalesOrderStatusHistoryRepository statusHistory,
+                             AuditService auditService) {
         this.orders = orders;
         this.items = items;
         this.mapper = mapper;
@@ -58,6 +61,7 @@ public class SalesOrderService {
         this.productService = productService;
         this.receiverAddresses = receiverAddresses;
         this.statusHistory = statusHistory;
+        this.auditService = auditService;
     }
 
     private static final Map<SalesOrderStatus, Set<SalesOrderStatus>> ALLOWED = Map.of(
@@ -125,6 +129,7 @@ public class SalesOrderService {
         recomputeTotals(order);
         orders.save(order);
         logStatusChange(order.getId(), null, SalesOrderStatus.NEW);
+        auditService.log("CREATE", "SALES_ORDER", order.getId());
         return mapper.toResponse(order, formatAddress(order.getReceiverAddressId()));
     }
 
@@ -142,6 +147,7 @@ public class SalesOrderService {
         logStatusChange(id, order.getStatus(), SalesOrderStatus.CONFIRMED);
         order.setStatus(SalesOrderStatus.CONFIRMED);
         orders.save(order);
+        auditService.log("STATUS_CHANGE", "SALES_ORDER", id);
     }
 
     @Transactional
@@ -155,6 +161,7 @@ public class SalesOrderService {
         logStatusChange(id, order.getStatus(), SalesOrderStatus.PROCESSING);
         order.setStatus(SalesOrderStatus.PROCESSING);
         orders.save(order);
+        auditService.log("STATUS_CHANGE", "SALES_ORDER", id);
     }
 
     public void ready(Long id) { changeStatus(findOrThrow(id), SalesOrderStatus.READY); }
@@ -173,6 +180,7 @@ public class SalesOrderService {
         logStatusChange(id, order.getStatus(), SalesOrderStatus.CANCELLED);
         order.setStatus(SalesOrderStatus.CANCELLED);
         orders.save(order);
+        auditService.log("STATUS_CHANGE", "SALES_ORDER", id);
     }
 
     @Transactional
@@ -196,6 +204,7 @@ public class SalesOrderService {
         logStatusChange(order.getId(), order.getStatus(), target);
         order.setStatus(target);
         orders.save(order);
+        auditService.log("STATUS_CHANGE", "SALES_ORDER", order.getId());
     }
 
     private void requireTransition(SalesOrderStatus from, SalesOrderStatus to) {

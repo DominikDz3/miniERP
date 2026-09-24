@@ -1,5 +1,6 @@
 package com.mini_erp.backend.warehouse.service;
 
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.warehouse.domain.Warehouse;
 import com.mini_erp.backend.shared.mappers.WarehouseMapper;
@@ -17,11 +18,13 @@ public class WarehouseService {
     private final WarehouseRepository warehouses;
     private final WarehouseMapper mapper;
     private final ProductRepository products;
+    private final AuditService auditService;
 
-    public WarehouseService(WarehouseRepository warehouses, WarehouseMapper mapper, ProductRepository products) {
+    public WarehouseService(WarehouseRepository warehouses, WarehouseMapper mapper, ProductRepository products, AuditService auditService) {
         this.warehouses = warehouses;
         this.mapper = mapper;
         this.products = products;
+        this.auditService = auditService;
     }
 
     @Transactional(readOnly = true)
@@ -41,7 +44,9 @@ public class WarehouseService {
         }
         Warehouse w = mapper.toEntity(req);
         applyCountryDefault(w);
-        return mapper.toResponse(warehouses.save(w));
+        Warehouse saved = warehouses.save(w);
+        auditService.log("CREATE", "WAREHOUSE", saved.getId());
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -49,12 +54,14 @@ public class WarehouseService {
         Warehouse w = findOrThrow(id);
         mapper.update(req, w);
         applyCountryDefault(w);
+        auditService.log("UPDATE", "WAREHOUSE", id);
         return mapper.toResponse(w);
     }
 
     @Transactional
     public void activate(Long id) {
         findOrThrow(id).setActive(true);
+        auditService.log("ACTIVATE", "WAREHOUSE", id);
     }
 
     @Transactional
@@ -66,6 +73,7 @@ public class WarehouseService {
                     "Nie można dezaktywować magazynu z aktywnymi produktami. Najpierw przenieś lub dezaktywuj towar");
         }
         w.setActive(false);
+        auditService.log("DEACTIVATE", "WAREHOUSE", id);
     }
 
     private Warehouse findOrThrow(Long id) {

@@ -1,5 +1,6 @@
 package com.mini_erp.backend.auth.service;
 
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.auth.domain.Role;
 import com.mini_erp.backend.auth.domain.User;
 import com.mini_erp.backend.auth.repository.RoleRepository;
@@ -21,12 +22,14 @@ public class UserService {
     private final RoleRepository roles;
     private final PasswordEncoder encoder;
     private final UserMapper mapper;
+    private final AuditService auditService;
 
-    public UserService(UserRepository users, RoleRepository roles, PasswordEncoder encoder, UserMapper mapper) {
+    public UserService(UserRepository users, RoleRepository roles, PasswordEncoder encoder, UserMapper mapper, AuditService auditService) {
         this.users = users;
         this.roles = roles;
         this.encoder = encoder;
         this.mapper = mapper;
+        this.auditService = auditService;
     }
 
     @Transactional(readOnly = true)
@@ -53,7 +56,9 @@ public class UserService {
         u.setFullName(req.fullName());
         u.setRole(role);
         u.setEnabled(true);
-        return mapper.toResponse(users.save(u));
+        User saved = users.save(u);
+        auditService.log("CREATE", "USER", saved.getId());
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -61,7 +66,9 @@ public class UserService {
         User u = findOrThrow(id);
         u.setFullName(req.fullName());
         u.setRole(findRoleOrThrow(req.roleName()));
-        return mapper.toResponse(users.save(u));
+        User saved = users.save(u);
+        auditService.log("UPDATE", "USER", saved.getId());
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -69,6 +76,7 @@ public class UserService {
         User u = findOrThrow(id);
         u.setPassword(encoder.encode(req.newPassword()));
         users.save(u);
+        auditService.log("PASSWORD_RESET", "USER", id);
     }
 
     @Transactional
@@ -76,6 +84,7 @@ public class UserService {
         User u = findOrThrow(id);
         u.setEnabled(true);
         users.save(u);
+        auditService.log("ACTIVATE", "USER", id);
     }
 
     @Transactional
@@ -86,6 +95,7 @@ public class UserService {
         }
         u.setEnabled(false);
         users.save(u);
+        auditService.log("DEACTIVATE", "USER", id);
     }
 
     // helpers

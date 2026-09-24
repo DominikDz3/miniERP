@@ -1,5 +1,6 @@
 package com.mini_erp.backend.supplier.service;
 
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.supplier.domain.Supplier;
 import com.mini_erp.backend.shared.mappers.SupplierMapper;
 import com.mini_erp.backend.supplier.repository.SupplierRepository;
@@ -15,10 +16,12 @@ public class SupplierService {
 
     private final SupplierRepository suppliers;
     private final SupplierMapper mapper;
+    private final AuditService auditService;
 
-    public SupplierService(SupplierRepository suppliers, SupplierMapper mapper) {
+    public SupplierService(SupplierRepository suppliers, SupplierMapper mapper, AuditService auditService) {
         this.suppliers = suppliers;
         this.mapper = mapper;
+        this.auditService = auditService;
     }
 
     @Transactional(readOnly = true)
@@ -38,7 +41,9 @@ public class SupplierService {
         }
         Supplier s = mapper.toEntity(req);
         applyCountryDefault(s);
-        return mapper.toResponse(suppliers.save(s));
+        Supplier saved = suppliers.save(s);
+        auditService.log("CREATE", "SUPPLIER", saved.getId());
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -46,6 +51,7 @@ public class SupplierService {
         Supplier s = findOrThrow(id);
         mapper.update(req, s);
         applyCountryDefault(s);
+        auditService.log("UPDATE", "SUPPLIER", s.getId());
         return mapper.toResponse(s);
     }
 
@@ -54,11 +60,13 @@ public class SupplierService {
         Supplier s = findOrThrow(id);
         s.setActive(true);
         suppliers.save(s);
+        auditService.log("ACTIVATE", "SUPPLIER", id);
     }
 
     @Transactional
     public void deactivate(Long id) {
         findOrThrow(id).setActive(false);
+        auditService.log("DEACTIVATE", "SUPPLIER", id);
     }
 
     private Supplier findOrThrow(Long id) {
