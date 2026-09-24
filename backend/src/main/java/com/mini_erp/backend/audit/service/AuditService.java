@@ -3,6 +3,7 @@ package com.mini_erp.backend.audit.service;
 import com.mini_erp.backend.audit.domain.AuditLog;
 import com.mini_erp.backend.audit.repository.AuditLogRepository;
 import com.mini_erp.backend.audit.web.dto.AuditLogResponse;
+import com.mini_erp.backend.shared.mappers.AuditLogMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,17 +16,17 @@ import java.time.LocalDateTime;
 public class AuditService {
 
     private final AuditLogRepository repo;
+    private final AuditLogMapper mapper;
 
-    public AuditService(AuditLogRepository repo) {
+    public AuditService(AuditLogRepository repo, AuditLogMapper mapper) {
+
         this.repo = repo;
+        this.mapper = mapper;
     }
 
     public Page<AuditLogResponse> list(String action, String entityType,
                                        LocalDateTime from, LocalDateTime to, Pageable pageable) {
-        return repo.search(action, entityType, from, to, pageable)
-                .map(a -> new AuditLogResponse(
-                        a.getId(), a.getAction(), a.getEntityType(),
-                        a.getEntityId(), a.getPerformedBy(), a.getCreatedAt()));
+        return repo.search(action, entityType, from, to, pageable).map(mapper::toResponse);
     }
 
     public void log(String action, String entityType, Long entityId, String username) {
