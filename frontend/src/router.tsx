@@ -11,6 +11,7 @@ import { salesRoutes } from "./features/sales/route";
 import { purchaseRoutes } from "./features/purchases/route";
 import { reportRoutes } from "./features/reports/route";
 import { DashboardView } from "./features/dashboard/views/DashboardView";
+import { userRoutes } from "./features/users/route";
 
 export const router = createBrowserRouter([
     // public
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
                     ...salesRoutes,
                     ...purchaseRoutes,
                     ...reportRoutes,
+                    ...userRoutes,
 
                     // placeholders - for now
 
