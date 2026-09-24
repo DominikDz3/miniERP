@@ -1,5 +1,7 @@
 package com.mini_erp.backend.purchase.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
 import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
@@ -138,7 +140,9 @@ public class PurchaseOrderService {
 
         recomputeTotals(order);
         logStatusChange(order.getId(), null, PurchaseOrderStatus.NEW);
-        auditService.log("CREATE", "PURCHASE_ORDER", order.getId(), "Utworzono zamówienie zakupu do: " + supplier.getName());
+        auditService.log(AuditAction.CREATE, AuditEntity.PURCHASE_ORDER, order.getId(),
+                "Utworzono zamówienie zakupu #" + order.getId() + " do " + supplier.getName()
+                        + " (" + order.getTotalGross() + " zł)");
         return mapper.toResponse(orders.save(order));
     }
 
@@ -164,7 +168,7 @@ public class PurchaseOrderService {
         logStatusChange(id, old, PurchaseOrderStatus.RECEIVED);
         order.setStatus(PurchaseOrderStatus.RECEIVED);
         orders.save(order);
-        auditService.log("STATUS_CHANGE", "PURCHASE_ORDER", id, "Status: " + old.label() + " → " + PurchaseOrderStatus.RECEIVED.label());
+        auditService.log(AuditAction.STATUS_CHANGE, AuditEntity.PURCHASE_ORDER, id, "Status: " + old.label() + " → " + PurchaseOrderStatus.RECEIVED.label());
     }
 
     @Transactional
@@ -181,8 +185,7 @@ public class PurchaseOrderService {
         logStatusChange(order.getId(), old, target);
         order.setStatus(target);
         orders.save(order);
-        auditService.log("STATUS_CHANGE", "PURCHASE_ORDER", order.getId(), "Status: " + old.label() + " → " + target.label());
-    }
+        auditService.log(AuditAction.STATUS_CHANGE, AuditEntity.PURCHASE_ORDER, order.getId(), "Status: " + old.label() + " → " + target.label());    }
 
     private void requireTransition(PurchaseOrderStatus from, PurchaseOrderStatus to) {
         if (!ALLOWED.get(from).contains(to)) {

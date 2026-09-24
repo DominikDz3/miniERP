@@ -1,5 +1,7 @@
 package com.mini_erp.backend.customer.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
 import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.customer.domain.Customer;
 import com.mini_erp.backend.customer.domain.PayerAddress;
@@ -58,7 +60,7 @@ public class CustomerService {
         }
 
         Customer c = customers.save(mapper.toEntity(req));
-        auditService.log("CREATE", "CUSTOMER", c.getId(), "Utworzono klienta: " + c.getName());
+        auditService.log(AuditAction.CREATE, AuditEntity.CUSTOMER, c.getId(), "Utworzono klienta: " + c.getName());
 
         PayerAddress firstPayer = null;
         for (AddressRequest ar : req.payerAddresses()) {
@@ -81,7 +83,7 @@ public class CustomerService {
         Customer c = findOrThrow(id);
         mapper.updateScalars(req, c);
         Customer saved = customers.save(c);
-        auditService.log("UPDATE", "CUSTOMER", saved.getId(), "Zaktualizowano klienta: " + saved.getName());
+        auditService.logJson(AuditAction.UPDATE, AuditEntity.CUSTOMER, saved.getId(), "Zaktualizowano klienta", req);
         return mapper.toResponse(saved);
     }
 
@@ -90,7 +92,7 @@ public class CustomerService {
         Customer c = findOrThrow(id);
         c.setActive(true);
         customers.save(c);
-        auditService.log("ACTIVATE", "CUSTOMER", id, "Aktywowano klienta");
+        auditService.log(AuditAction.ACTIVATE, AuditEntity.CUSTOMER, id, "Aktywowano klienta: " + c.getName());
     }
 
     @Transactional
@@ -98,8 +100,7 @@ public class CustomerService {
         Customer c = findOrThrow(id);
         c.setActive(false);
         customers.save(c);
-        auditService.log("DEACTIVATE", "CUSTOMER", id, "Dezaktywowano klienta");
-    }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.CUSTOMER, id, "Dezaktywowano klienta: " + c.getName());   }
 
     private Customer findOrThrow(Long id) {
         return customers.findById(id)

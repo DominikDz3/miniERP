@@ -1,5 +1,8 @@
 package com.mini_erp.backend.audit.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
 import com.mini_erp.backend.audit.domain.AuditLog;
 import com.mini_erp.backend.audit.repository.AuditLogRepository;
 import com.mini_erp.backend.audit.web.dto.AuditLogResponse;
@@ -17,6 +20,7 @@ public class AuditService {
 
     private final AuditLogRepository repo;
     private final AuditLogMapper mapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public AuditService(AuditLogRepository repo, AuditLogMapper mapper) {
 
@@ -29,7 +33,7 @@ public class AuditService {
         return repo.search(action, entityType, from, to, pageable).map(mapper::toResponse);
     }
 
-    public void log(String action, String entityType, Long entityId, String details, String username) {
+    public void log(AuditAction action, AuditEntity entityType, Long entityId, String details, String username) {
         AuditLog a = new AuditLog();
         a.setAction(action);
         a.setEntityType(entityType);
@@ -39,8 +43,18 @@ public class AuditService {
         repo.save(a);
     }
 
-    public void log(String action, String entityType, Long entityId, String details) {
+    public void log(AuditAction action, AuditEntity entityType, Long entityId, String details) {
         log(action, entityType, entityId, details, currentUsername());
+    }
+
+    public void logJson(AuditAction action, AuditEntity entityType, Long entityId, String description, Object payload) {
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(payload);
+        } catch (Exception e) {
+            json = "(nie udało się zserializować danych)";
+        }
+        log(action, entityType, entityId, description + " : " + json);
     }
 
     private String currentUsername() {

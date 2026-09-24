@@ -3,7 +3,7 @@ create table audit_log (
     action       varchar(30)  not null,
     entity_type  varchar(30),
     entity_id    bigint,
-    details      varchar(255) not null,
+    details      text          not null,
     performed_by varchar(50)  not null,
     created_at   timestamp    not null default now()
 );

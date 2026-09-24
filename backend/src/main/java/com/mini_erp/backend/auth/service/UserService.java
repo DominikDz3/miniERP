@@ -1,5 +1,7 @@
 package com.mini_erp.backend.auth.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
 import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.auth.domain.Role;
 import com.mini_erp.backend.auth.domain.User;
@@ -57,7 +59,7 @@ public class UserService {
         u.setRole(role);
         u.setEnabled(true);
         User saved = users.save(u);
-        auditService.log("CREATE", "USER", saved.getId(), "Utworzono użytkownika: " + saved.getUsername());
+        auditService.log(AuditAction.CREATE, AuditEntity.USER, saved.getId(), "Utworzono użytkownika: " + saved.getUsername());
         return mapper.toResponse(saved);
     }
 
@@ -67,7 +69,7 @@ public class UserService {
         u.setFullName(req.fullName());
         u.setRole(findRoleOrThrow(req.roleName()));
         User saved = users.save(u);
-        auditService.log("UPDATE", "USER", saved.getId(), "Zaktualizowano użytkownika: " + saved.getUsername());
+        auditService.logJson(AuditAction.UPDATE, AuditEntity.USER, id, "Zaktualizowano użytkownika", req);
         return mapper.toResponse(saved);
     }
 
@@ -76,7 +78,7 @@ public class UserService {
         User u = findOrThrow(id);
         u.setPassword(encoder.encode(req.newPassword()));
         users.save(u);
-        auditService.log("PASSWORD_RESET", "USER", id, "Zresetowano hasło dla użytkownika: " + u.getUsername());
+        auditService.log(AuditAction.PASSWORD_RESET, AuditEntity.USER, id, "Zresetowano hasło");
     }
 
     @Transactional
@@ -84,7 +86,7 @@ public class UserService {
         User u = findOrThrow(id);
         u.setEnabled(true);
         users.save(u);
-        auditService.log("ACTIVATE", "USER", id, "Aktywowano użytkownika: " + u.getUsername());
+        auditService.log(AuditAction.ACTIVATE, AuditEntity.USER, id, "Aktywowano konto");
     }
 
     @Transactional
@@ -95,8 +97,7 @@ public class UserService {
         }
         u.setEnabled(false);
         users.save(u);
-        auditService.log("DEACTIVATE", "USER", id, "Dezaktywowano użytkownika: " + u.getUsername());
-    }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.USER, id, "Dezaktywowano konto");    }
 
     // helpers
 

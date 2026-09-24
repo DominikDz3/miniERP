@@ -1,5 +1,6 @@
 package com.mini_erp.backend.auth.web;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
 import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.auth.service.JwtService;
 import com.mini_erp.backend.auth.web.dto.LoginResponse;
@@ -43,11 +44,11 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(request.username(), request.password()));
             var user = (UserDetails) authentication.getPrincipal();
 
-            auditService.log("LOGIN_SUCCESS", null, null, "Zalogowano: " + username, username);
+            auditService.log(AuditAction.LOGIN_SUCCESS, null, null, "Zalogowano: " + username, username);
             response.addCookie(refreshCookie(jwtService.generateRefreshToken(user), REFRESH_MAX_AGE));
             return new LoginResponse(jwtService.generateToken(user));
         } catch (AuthenticationException e) {
-            auditService.log("LOGIN_FAILED", null, null, "Nieudane logowanie: " + username);
+            auditService.log(AuditAction.LOGIN_FAILED, null, null, "Nieudane logowanie: " + username);
             throw e;
         }
     }

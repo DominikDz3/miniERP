@@ -15,15 +15,17 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private String action;
+    private AuditAction action;
 
-    @Column(length = 30)
-    private String entityType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "entity_type", length = 30)
+    private AuditEntity entityType;
 
     private Long entityId;
 
-    @Column(length = 255)
+    @Column(columnDefinition = "text")
     private String details;
 
     @Column(nullable = false, length = 100)

@@ -1,5 +1,7 @@
 package com.mini_erp.backend.warehouse.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
 import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.warehouse.domain.Warehouse;
@@ -45,7 +47,7 @@ public class WarehouseService {
         Warehouse w = mapper.toEntity(req);
         applyCountryDefault(w);
         Warehouse saved = warehouses.save(w);
-        auditService.log("CREATE", "WAREHOUSE", saved.getId(), "Utworzono magazyn: " + saved.getName());
+        auditService.log(AuditAction.CREATE, AuditEntity.WAREHOUSE, saved.getId(), "Utworzono magazyn: " + saved.getName());
         return mapper.toResponse(saved);
     }
 
@@ -54,7 +56,7 @@ public class WarehouseService {
         Warehouse w = findOrThrow(id);
         mapper.update(req, w);
         applyCountryDefault(w);
-        auditService.log("UPDATE", "WAREHOUSE", id, "Zaktualizowano magazyn: " + w.getName());
+        auditService.logJson(AuditAction.UPDATE, AuditEntity.WAREHOUSE, id, "Zaktualizowano magazyn", req);
         return mapper.toResponse(w);
     }
 
@@ -63,7 +65,7 @@ public class WarehouseService {
         Warehouse w = findOrThrow(id);
         w.setActive(true);
         warehouses.save(w);
-        auditService.log("ACTIVATE", "WAREHOUSE", id, "Aktywowano magazyn: " + w.getName());
+        auditService.log(AuditAction.ACTIVATE, AuditEntity.WAREHOUSE, id, "Aktywowano magazyn: " + w.getName());
     }
 
     @Transactional
@@ -75,8 +77,7 @@ public class WarehouseService {
                     "Nie można dezaktywować magazynu z aktywnymi produktami. Najpierw przenieś lub dezaktywuj towar");
         }
         w.setActive(false);
-        auditService.log("DEACTIVATE", "WAREHOUSE", id, "Dezaktywowano magazyn: " + w.getName());
-    }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.WAREHOUSE, id, "Dezaktywowano magazyn: " + w.getName());    }
 
     private Warehouse findOrThrow(Long id) {
         return warehouses.findById(id)

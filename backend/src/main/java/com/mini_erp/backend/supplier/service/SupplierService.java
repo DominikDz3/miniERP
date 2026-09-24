@@ -1,5 +1,7 @@
 package com.mini_erp.backend.supplier.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
 import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.supplier.domain.Supplier;
 import com.mini_erp.backend.shared.mappers.SupplierMapper;
@@ -42,7 +44,7 @@ public class SupplierService {
         Supplier s = mapper.toEntity(req);
         applyCountryDefault(s);
         Supplier saved = suppliers.save(s);
-        auditService.log("CREATE", "SUPPLIER", saved.getId(), "Utworzono dostawcę: " + saved.getName());
+        auditService.log(AuditAction.CREATE, AuditEntity.SUPPLIER, saved.getId(), "Utworzono dostawcę: " + saved.getName());
         return mapper.toResponse(saved);
     }
 
@@ -51,7 +53,7 @@ public class SupplierService {
         Supplier s = findOrThrow(id);
         mapper.update(req, s);
         applyCountryDefault(s);
-        auditService.log("UPDATE", "SUPPLIER", s.getId(), "Zaktualizowano dostawcę: " + s.getName());
+        auditService.logJson(AuditAction.UPDATE, AuditEntity.SUPPLIER, id, "Zaktualizowano dostawcę", req);
         return mapper.toResponse(s);
     }
 
@@ -60,7 +62,7 @@ public class SupplierService {
         Supplier s = findOrThrow(id);
         s.setActive(true);
         suppliers.save(s);
-        auditService.log("ACTIVATE", "SUPPLIER", id, "Aktywowano dostawcę: " + s.getName());
+        auditService.log(AuditAction.ACTIVATE, AuditEntity.SUPPLIER, id, "Aktywowano dostawcę: " + s.getName());
     }
 
     @Transactional
@@ -68,8 +70,7 @@ public class SupplierService {
         Supplier s = findOrThrow(id);
         s.setActive(false);
         suppliers.save(s);
-        auditService.log("DEACTIVATE", "SUPPLIER", id, "Dezaktywowano dostawcę" + s.getName());
-    }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.SUPPLIER, id, "Dezaktywowano dostawcę: " + s.getName());    }
 
     private Supplier findOrThrow(Long id) {
         return suppliers.findById(id)
