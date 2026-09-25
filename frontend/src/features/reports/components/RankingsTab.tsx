@@ -1,51 +1,62 @@
 import { useTopProducts, useTopCustomers } from "../hooks/useReports";
 
+const cardCls = "bg-white rounded-xl shadow-sm border border-gray-100";
+const sectionTitleCls = "text-sm font-medium text-gray-500";
+
 export function RankingsTab({ from, to }: { from: string; to: string }) {
   const { data: products } = useTopProducts(from, to);
   const { data: customers } = useTopCustomers(from, to);
 
   return (
     <div className="space-y-6">
-      <section className="bg-white rounded-lg shadow p-5">
-        <h2 className="font-medium text-gray-600 mb-3">Najlepiej sprzedające się produkty</h2>
+      <section className={`${cardCls} overflow-hidden`}>
+        <div className="px-5 pt-5 pb-3">
+          <h2 className={sectionTitleCls}>Najlepiej sprzedające się produkty</h2>
+        </div>
         <table className="w-full text-sm">
-          <thead className="text-left">
-            <tr>
-              <th className="py-2 font-medium text-gray-500">SKU</th>
-              <th className="py-2 font-medium text-gray-500">Produkt</th>
-              <th className="py-2 font-medium text-gray-500 text-right">Ilość</th>
-              <th className="py-2 font-medium text-gray-500 text-right">Wartość netto</th>
+          <thead>
+            <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-gray-400">
+              <th className="w-12 px-5 py-3 font-medium">#</th>
+              <th className="px-5 py-3 font-medium">SKU</th>
+              <th className="px-5 py-3 font-medium">Produkt</th>
+              <th className="px-5 py-3 font-medium text-right">Ilość</th>
+              <th className="px-5 py-3 font-medium text-right">Wartość netto</th>
             </tr>
           </thead>
-          <tbody>
-            {products?.map((r) => (
-              <tr key={r.productId} className="border-t">
-                <td className="py-2 font-mono text-xs">{r.sku}</td>
-                <td className="py-2">{r.productName}</td>
-                <td className="py-2 text-right">{r.totalQuantity}</td>
-                <td className="py-2 text-right">{r.totalNet.toFixed(2)} zł</td>
+          <tbody className="divide-y divide-gray-50">
+            {products?.map((r, index) => (
+              <tr key={r.productId} className="hover:bg-gray-50/50 transition-colors">
+                <td className="px-5 py-3 text-xs text-gray-400 font-mono">{index + 1}.</td>
+                <td className="px-5 py-3 font-mono text-xs text-gray-500">{r.sku}</td>
+                <td className="px-5 py-3 font-medium text-gray-800">{r.productName}</td>
+                <td className="px-5 py-3 text-right font-medium text-gray-800">{r.totalQuantity}</td>
+                <td className="px-5 py-3 text-right font-semibold text-gray-900">{r.totalNet.toFixed(2)} zł</td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
 
-      <section className="bg-white rounded-lg shadow p-5">
-        <h2 className="font-medium text-gray-600 mb-3">Najaktywniejsi klienci</h2>
+      <section className={`${cardCls} overflow-hidden`}>
+        <div className="px-5 pt-5 pb-3">
+          <h2 className={sectionTitleCls}>Najaktywniejsi klienci</h2>
+        </div>
         <table className="w-full text-sm">
-          <thead className="text-left">
-            <tr>
-              <th className="py-2 font-medium text-gray-500">Klient</th>
-              <th className="py-2 font-medium text-gray-500 text-right">Zamówienia</th>
-              <th className="py-2 font-medium text-gray-500 text-right">Wartość brutto</th>
+          <thead>
+            <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-gray-400">
+              <th className="w-12 px-5 py-3 font-medium">#</th>
+              <th className="px-5 py-3 font-medium">Klient</th>
+              <th className="px-5 py-3 font-medium text-right">Zamówienia</th>
+              <th className="px-5 py-3 font-medium text-right">Wartość brutto</th>
             </tr>
           </thead>
-          <tbody>
-            {customers?.map((r) => (
-              <tr key={r.customerId} className="border-t">
-                <td className="py-2">{r.customerName}</td>
-                <td className="py-2 text-right">{r.ordersCount}</td>
-                <td className="py-2 text-right">{r.totalGross.toFixed(2)} zł</td>
+          <tbody className="divide-y divide-gray-50">
+            {customers?.map((r, index) => (
+              <tr key={r.customerId} className="hover:bg-gray-50/50 transition-colors">
+                <td className="px-5 py-3 text-xs text-gray-400 font-mono">{index + 1}.</td>
+                <td className="px-5 py-3 font-medium text-gray-800">{r.customerName}</td>
+                <td className="px-5 py-3 text-right font-medium text-gray-800">{r.ordersCount}</td>
+                <td className="px-5 py-3 text-right font-semibold text-gray-900">{r.totalGross.toFixed(2)} zł</td>
               </tr>
             ))}
           </tbody>

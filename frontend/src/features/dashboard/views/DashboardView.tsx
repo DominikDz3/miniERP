@@ -8,6 +8,9 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
 } from "recharts";
 
+const cardCls = "bg-white rounded-xl shadow-sm border border-gray-100 p-5";
+const sectionTitleCls = "text-sm font-medium text-gray-500 mb-3";
+
 function monthRange(): { from: string; to: string } {
   const now = new Date();
   const first = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -33,7 +36,10 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Pulpit</h1>
+      <div>
+        <h1 className="text-2xl font-semibold">Pulpit</h1>
+        <p className="text-sm text-gray-400 mt-1">Podsumowanie bieżących operacji i wskaźników firmy</p>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card label="Klienci" value={String(summary.customersCount)} />
@@ -45,17 +51,17 @@ export function DashboardView() {
         <Card label="Produkty poniżej minimum" value={String(summary.lowStockCount)} />
       </div>
 
-      <section className="bg-white rounded-lg shadow p-5">
-        <h2 className="font-medium text-gray-600 mb-3 flex items-center gap-2">
-        Powiadomienia
+      <section className={cardCls}>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className={sectionTitleCls}>Powiadomienia</h2>
           {low && low.length > 0 && (
-            <span className="ml-auto text-xs bg-red-100 text-red-700 rounded-full px-2 py-0.5 font-medium">
-              {low.length}
+            <span className="text-xs bg-red-50 text-red-700 border border-red-100 rounded-full px-2.5 py-0.5 font-medium">
+              {low.length} wymaga uwagi
             </span>
           )}
-        </h2>
+        </div>
         {low && low.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-96 overflow-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-auto">
             {low.slice(0, 10).map((r) => (
               <NotificationItem
                 key={r.productId}
@@ -74,9 +80,9 @@ export function DashboardView() {
         )}
       </section>
 
-       <section className="bg-white rounded-lg shadow p-5">
+      <section className={cardCls}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-medium text-gray-600">Sprzedaż w tym miesiącu</h2>
+          <h2 className={sectionTitleCls}>Sprzedaż w tym miesiącu</h2>
           <div className="text-right">
             <div className="text-xs text-gray-400">Łącznie ({monthLabel})</div>
             <div className="text-lg font-semibold text-gray-800">
@@ -93,7 +99,7 @@ export function DashboardView() {
                   <stop offset="100%" stopColor="#93c5fd" stopOpacity={0.7} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis dataKey="period" tick={{ fontSize: 12, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
               <YAxis
                 tick={{ fontSize: 12, fill: "#9ca3af" }}
@@ -103,10 +109,10 @@ export function DashboardView() {
               />
               <Tooltip
                 cursor={{ fill: "#f9fafb" }}
-                contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13 }}
+                contentStyle={{ borderRadius: "0.75rem", border: "1px solid #f3f4f6", fontSize: 13, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.05)" }}
                 formatter={(v) => [`${Number(v).toFixed(2)} zł`, "Brutto"]}
               />
-              <Bar dataKey="brutto" fill="url(#salesGradient)" radius={[6, 6, 0, 0]} maxBarSize={48} />
+              <Bar dataKey="brutto" fill="#2563eb" radius={[6, 6, 0, 0]} maxBarSize={48} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -117,10 +123,10 @@ export function DashboardView() {
         )}
       </section>
 
-      <section className="bg-white rounded-lg shadow p-5">
-        <h2 className="font-medium text-gray-600 mb-3">Ostatnie operacje magazynowe</h2>
+      <section className={cardCls}>
+        <h2 className={sectionTitleCls}>Ostatnie operacje magazynowe</h2>
         {movements && movements.content.length > 0 ? (
-          <div className="divide-y">
+          <div className="divide-y divide-gray-50">
             {movements.content.map((m) => (
               <MovementItem
                 key={m.id}
@@ -133,7 +139,7 @@ export function DashboardView() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-400">Brak operacji.</p>
+          <p className="text-gray-400 text-sm">Brak operacji.</p>
         )}
       </section>
     </div>

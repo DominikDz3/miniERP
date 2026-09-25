@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
+import { inputCls } from "@/shared/components/formStyles";
 
 interface Props {
   value: number | null;
@@ -7,8 +8,6 @@ interface Props {
   onSelect: (id: number, name: string) => void;
   error?: string;
 }
-
-const inputCls = "w-full border rounded px-3 py-2";
 
 export function SupplierAutocomplete({ value, selectedName, onSelect, error }: Props) {
   const [query, setQuery] = useState("");
@@ -44,7 +43,7 @@ export function SupplierAutocomplete({ value, selectedName, onSelect, error }: P
       {error && <p className="text-red-600 text-xs mt-1">{error}</p>}
 
       {showList && (
-        <ul className="absolute z-10 w-full bg-white border rounded mt-1 shadow max-h-60 overflow-auto">
+        <ul className="absolute z-10 w-full bg-white border border-gray-100 rounded-xl mt-1 shadow-lg max-h-60 overflow-auto divide-y divide-gray-50">
           {results.map((s) => (
             <li
               key={s.id}
@@ -53,9 +52,10 @@ export function SupplierAutocomplete({ value, selectedName, onSelect, error }: P
                 setQuery("");
                 setOpen(false);
               }}
-              className="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+              className="px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors cursor-pointer text-gray-700"
             >
-              {s.name}{s.nip ? ` · NIP ${s.nip}` : ""}
+              <span className="font-medium text-gray-800">{s.name}</span>
+              {s.nip && <span className="font-mono text-xs text-gray-400 ml-2">NIP {s.nip}</span>}
             </li>
           ))}
         </ul>

@@ -38,45 +38,47 @@ export function CustomerDetailsView() {
     <div className="max-w-3xl">
       <button
         onClick={() => navigate("/customers")}
-        className="text-sm text-gray-500 hover:text-gray-700 mb-4"
-      >
+        className="text-sm text-gray-500 hover:text-gray-700 mb-4 cursor-pointer">
         ← Wróć do listy
       </button>
 
       <div className="flex items-center gap-3 mb-6">
         <h1 className="text-2xl font-semibold">{customer.name}</h1>
-        {customer.active
-          ? <span className="text-green-700 text-sm">aktywny</span>
-          : <span className="text-gray-400 text-sm">nieaktywny</span>}
+        {customer.active ? (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-700">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Aktywny
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" /> Nieaktywny
+          </span>
+        )}
 
         {customer.active ? (
           <button
             onClick={() => setConfirmOpen(true)}
-            className="ml-auto text-red-600 hover:text-red-800 text-sm border border-red-300 rounded px-3 py-1"
-          >
+            className="ml-auto text-sm text-red-600 hover:bg-red-50 rounded-lg px-3 py-1.5 cursor-pointer">
             Dezaktywuj
           </button>
         ) : (
           <button
             onClick={() => activate.mutate(customer.id)}
             disabled={activate.isPending}
-            className="ml-auto text-green-700 hover:text-green-900 text-sm border border-green-300 rounded px-3 py-1 disabled:opacity-40"
-          >
+            className="ml-auto text-sm text-green-700 hover:bg-green-50 rounded-lg px-3 py-1.5 disabled:opacity-40 cursor-pointer">
             Aktywuj
           </button>
         )}
       </div>
 
-      {/* dane podstawowe */}
-      <section className="bg-white rounded-lg shadow p-5 mb-6">
-        <h2 className="font-medium text-gray-600 mb-3">Dane</h2>
+      <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+        <h2 className="text-sm font-medium text-gray-500 mb-3">Dane</h2>
         <dl className="grid grid-cols-2 gap-y-2 text-sm">
           <dt className="text-gray-500">NIP</dt>
-          <dd>{customer.nip ?? "—"}</dd>
+          <dd className="text-gray-800">{customer.nip ?? "—"}</dd>
           <dt className="text-gray-500">E-mail</dt>
-          <dd>{customer.email}</dd>
+          <dd className="text-gray-800">{customer.email}</dd>
           <dt className="text-gray-500">Utworzono</dt>
-          <dd>{new Date(customer.createdAt).toLocaleString("pl-PL")}</dd>
+          <dd className="text-gray-800">{new Date(customer.createdAt).toLocaleString("pl-PL")}</dd>
         </dl>
       </section>
 
@@ -97,17 +99,10 @@ export function CustomerDetailsView() {
         />
       </div>
 
-      {/* dodawanie adresu */}
       {addrModal && (
-        <AddAddressModal
-          open
-          customerId={customer.id}
-          type={addrModal}
-          onClose={() => setAddrModal(null)}
-        />
+        <AddAddressModal open customerId={customer.id} type={addrModal} onClose={() => setAddrModal(null)} />
       )}
 
-      {/* potwierdzenie dezaktywacji */}
       <ConfirmModal
         open={confirmOpen}
         title="Dezaktywować klienta?"
@@ -132,28 +127,27 @@ function AddressList({
   onSetDefault: (addressId: number) => void;
 }) {
   return (
-    <section className="bg-white rounded-lg shadow p-5">
+    <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-medium text-gray-600">{title}</h2>
-        <button onClick={onAdd} className="text-blue-600 hover:text-blue-800 text-sm">
+        <h2 className="text-sm font-medium text-gray-500">{title}</h2>
+        <button onClick={onAdd} className="text-blue-600 hover:text-blue-800 text-sm cursor-pointer">
           + Dodaj adres
         </button>
       </div>
       {!addresses || addresses.length === 0 ? (
         <p className="text-gray-400 text-sm">Brak adresów.</p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-2">
           {addresses.map((a) => (
-            <li key={a.id} className="text-sm border rounded p-3">
+            <li key={a.id} className="text-sm border border-gray-100 rounded-lg p-3">
               <div className="flex items-center gap-2">
-                <span className="font-medium">{a.street}</span>
+                <span className="font-medium text-gray-800">{a.street}</span>
                 {a.id === defaultId ? (
-                  <span className="text-xs bg-blue-100 text-blue-700 rounded px-2 py-0.5">domyślny</span>
+                  <span className="text-xs bg-blue-100 text-blue-700 rounded-full px-2 py-0.5">domyślny</span>
                 ) : (
                   <button
                     onClick={() => onSetDefault(a.id)}
-                    className="ml-auto text-xs text-gray-500 hover:text-blue-700"
-                  >
+                    className="ml-auto text-xs text-gray-400 hover:text-blue-700 cursor-pointer">
                     Ustaw domyślny
                   </button>
                 )}

@@ -34,24 +34,29 @@ export function ProductsView() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Produkty</h1>
-        <div className="flex gap-3 items-right">
-        {hasAuthority("PRODUCT_WRITE") && (
-          <button
-            onClick={() => navigate("/categories/new")}
-            className="bg-blue-600 text-white rounded px-4 py-2 text-sm cursor-pointer">
-            Dodaj kategorię
-          </button>
-        )}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Produkty</h1>
+          <p className="text-sm text-gray-400 mt-1">{data?.totalElements ?? 0} pozycji w katalogu</p>
+        </div>
+        <div className="flex gap-2">
+          {hasAuthority("PRODUCT_WRITE") && (
+            <button
+              onClick={() => navigate("/categories/new")}
+              className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg font-medium cursor-pointer"
+            >
+              + Nowa kategoria
+            </button>
+          )}
 
-        {hasAuthority("PRODUCT_WRITE") && (
-          <button
-            onClick={() => navigate("/products/new")}
-            className="bg-blue-600 text-white rounded px-4 py-2 text-sm cursor-pointer">
-            Dodaj produkt
-          </button>
-        )}
+          {hasAuthority("PRODUCT_WRITE") && (
+            <button
+              onClick={() => navigate("/products/new")}
+              className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 cursor-pointer flex items-center gap-2"
+            >
+              <span className="text-lg leading-none">+</span> Nowy produkt
+            </button>
+          )}
         </div>     
       </div>
 

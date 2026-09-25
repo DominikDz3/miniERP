@@ -32,13 +32,16 @@ export function SalesOrdersView() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Zamówienia</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Zamówienia</h1>
+          <p className="text-sm text-gray-400 mt-1">{data?.totalElements ?? 0} zamówień sprzedażowych</p>
+        </div>
         {hasAuthority("SALES_WRITE") && (
           <button
             onClick={() => navigate("/sales-orders/new")}
-            className="bg-blue-600 text-white rounded px-4 py-2 text-sm cursor-pointer">
-            Nowe zamówienie
+            className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 cursor-pointer flex items-center gap-2">
+            <span className="text-lg leading-none">+</span> Nowe zamówienie
           </button>
         )}
       </div>
