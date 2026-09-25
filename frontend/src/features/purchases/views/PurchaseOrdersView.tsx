@@ -14,7 +14,9 @@ export function PurchaseOrdersView() {
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
   const [sorting, setSorting] = useState<SortingState>([{ id: "id", desc: true }]);
   const [applied, setApplied] = useState<{ status: PurchaseOrderStatus | ""; from: string; to: string }>({
-    status: "", from: "", to: "",
+    status: "",
+    from: "",
+    to: "",
   });
 
   const sortParam = sorting[0] ? `${sorting[0].id},${sorting[0].desc ? "desc" : "asc"}` : undefined;
@@ -30,12 +32,17 @@ export function PurchaseOrdersView() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Zamówienia zakupu</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Zamówienia zakupu</h1>
+          <p className="text-sm text-gray-400 mt-1">{data?.totalElements ?? 0} zamówień zakupu</p>
+        </div>
         {hasAuthority("PURCHASE_WRITE") && (
-          <button onClick={() => navigate("/purchase-orders/new")}
-            className="bg-blue-600 text-white rounded px-4 py-2 text-sm cursor-pointer">
-            Nowe zamówienie
+          <button
+            onClick={() => navigate("/purchase-orders/new")}
+            className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 cursor-pointer flex items-center gap-2"
+          >
+            <span className="text-lg leading-none">+</span> Nowe zamówienie
           </button>
         )}
       </div>
@@ -43,7 +50,7 @@ export function PurchaseOrdersView() {
       <PurchaseOrderFilters
         onApply={(f) => {
           setApplied(f);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));   // nowy filtr -> strona 1
+          setPagination((p) => ({ ...p, pageIndex: 0 }));
         }}
       />
 
@@ -51,12 +58,15 @@ export function PurchaseOrdersView() {
 
       <PurchaseOrderTable
         data={data?.content ?? []}
-        isLoading={isLoading} isFetching={isFetching}
+        isLoading={isLoading}
+        isFetching={isFetching}
         totalElements={data?.totalElements ?? 0}
         pageNumber={data?.number ?? 0}
         totalPages={data?.totalPages ?? 0}
-        sorting={sorting} onSortingChange={setSorting}
-        pagination={pagination} onPaginationChange={setPagination}
+        sorting={sorting}
+        onSortingChange={setSorting}
+        pagination={pagination}
+        onPaginationChange={setPagination}
         onRowClick={(id) => navigate(`/purchase-orders/${id}`)}
       />
     </div>

@@ -28,12 +28,15 @@ export function CustomersView() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Klienci</h1>
-        <button 
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Klienci</h1>
+          <p className="text-sm text-gray-400 mt-1">{data?.totalElements ?? 0} kontrahentów</p>
+        </div>
+        <button
           onClick={() => navigate("/customers/new")}
-          className="bg-blue-600 text-white rounded px-4 py-2 text-sm">
-          Dodaj klienta
+          className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 cursor-pointer flex items-center gap-2">
+          <span className="text-lg leading-none">+</span> Dodaj klienta
         </button>
       </div>
 

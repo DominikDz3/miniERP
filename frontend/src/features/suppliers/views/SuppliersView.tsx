@@ -30,13 +30,17 @@ export function SuppliersView() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Dostawcy</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Dostawcy</h1>
+          <p className="text-sm text-gray-400 mt-1">{data?.totalElements ?? 0} dostawców w kartotece</p>
+        </div>
         {hasAuthority("SUPPLIER_WRITE") && (
           <button
             onClick={() => navigate("/suppliers/new")}
-            className="bg-blue-600 text-white rounded px-4 py-2 text-sm cursor-pointer">
-            Dodaj dostawcę
+            className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 cursor-pointer flex items-center gap-2"
+          >
+            <span className="text-lg leading-none">+</span> Nowy dostawca
           </button>
         )}
       </div>

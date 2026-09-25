@@ -1,3 +1,5 @@
+import { labelCls, inputCls } from "@/shared/components/formStyles";
+
 type ActiveFilter = "all" | "active" | "inactive";
 
 interface Props {
@@ -8,23 +10,45 @@ interface Props {
 }
 
 export function SupplierFilters({ search, onSearchChange, activeFilter, onActiveChange }: Props) {
+  const clearAll = () => {
+    onSearchChange("");
+    onActiveChange("all");
+  };
+
   return (
-    <div className="flex gap-3 mb-4">
-      <input
-        className="flex-1 border rounded px-3 py-2"
-        placeholder="Szukaj po nazwie lub NIP…"
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-      />
-      <select
-        className="border rounded px-3 py-2 bg-white"
-        value={activeFilter}
-        onChange={(e) => onActiveChange(e.target.value as ActiveFilter)}
-      >
-        <option value="all">Wszyscy</option>
-        <option value="active">Aktywni</option>
-        <option value="inactive">Nieaktywni</option>
-      </select>
+    <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 shadow-sm">
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex-1 min-w-[220px]">
+          <label className={labelCls}>Szukaj</label>
+          <input
+            className={inputCls}
+            placeholder="Szukaj po nazwie lub NIP…"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+        </div>
+        <div className="w-48">
+          <label className={labelCls}>Status</label>
+          <select
+            className={inputCls}
+            value={activeFilter}
+            onChange={(e) => onActiveChange(e.target.value as ActiveFilter)}
+          >
+            <option value="all">Wszyscy</option>
+            <option value="active">Aktywni</option>
+            <option value="inactive">Nieaktywni</option>
+          </select>
+        </div>
+        {(search || activeFilter !== "all") && (
+          <button
+            type="button"
+            onClick={clearAll}
+            className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer"
+          >
+            Wyczyść
+          </button>
+        )}
+      </div>
     </div>
   );
 }
