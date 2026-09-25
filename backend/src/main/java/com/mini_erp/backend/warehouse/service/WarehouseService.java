@@ -47,7 +47,7 @@ public class WarehouseService {
         Warehouse w = mapper.toEntity(req);
         applyCountryDefault(w);
         Warehouse saved = warehouses.save(w);
-        auditService.log(AuditAction.CREATE, AuditEntity.WAREHOUSE, saved.getId(), "Utworzono magazyn: " + saved.getName());
+        auditService.logJson(AuditAction.CREATE, AuditEntity.WAREHOUSE, saved.getId(), "Utworzono magazyn: " + saved.getName(), req);
         return mapper.toResponse(saved);
     }
 

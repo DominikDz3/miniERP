@@ -28,7 +28,7 @@ public class AuditService {
         this.mapper = mapper;
     }
 
-    public Page<AuditLogResponse> list(String action, String entityType,
+    public Page<AuditLogResponse> list(AuditAction action, AuditEntity entityType,
                                        LocalDateTime from, LocalDateTime to, Pageable pageable) {
         return repo.search(action, entityType, from, to, pageable).map(mapper::toResponse);
     }

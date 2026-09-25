@@ -1,5 +1,7 @@
 package com.mini_erp.backend.audit.web;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
 import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.audit.web.dto.AuditLogResponse;
 import com.mini_erp.backend.shared.util.DateRange;
@@ -26,8 +28,8 @@ public class AuditController {
 
     @GetMapping
     public Page<AuditLogResponse> list(
-            @RequestParam(required = false) String action,
-            @RequestParam(required = false) String entityType,
+            @RequestParam(required = false) AuditAction action,
+            @RequestParam(required = false) AuditEntity entityType,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @ParameterObject Pageable pageable) {
