@@ -1,5 +1,7 @@
 package com.mini_erp.backend.audit.repository;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
 import com.mini_erp.backend.audit.domain.AuditLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +21,8 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
           and (cast(:to as timestamp) is null or a.createdAt <= :to)
         order by a.createdAt desc
         """)
-    Page<AuditLog> search(@Param("action") String action,
-                          @Param("entityType") String entityType,
+    Page<AuditLog> search(@Param("action") AuditAction action,
+                          @Param("entityType") AuditEntity entityType,
                           @Param("from") LocalDateTime from,
                           @Param("to") LocalDateTime to,
                           Pageable pageable);

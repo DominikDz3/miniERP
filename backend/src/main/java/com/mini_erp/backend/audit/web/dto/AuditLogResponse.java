@@ -7,6 +7,7 @@ public record AuditLogResponse(
         String action,
         String entityType,
         Long entityId,
+        String details,
         String performedBy,
         LocalDateTime createdAt
 ) {}
