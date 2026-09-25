@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { AppLayout } from "./core/layouts/AppLayout";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
-import { AuditPage, ForbiddenPage } from "./pages/modules/Placeholders";
+import { ForbiddenPage } from "./pages/modules/Placeholders";
 import { authRoutes } from "./features/auth/routes";
 import { customerRoutes } from "./features/customers/routes";
 import { productRoutes } from "./features/products/route";
@@ -12,6 +12,7 @@ import { purchaseRoutes } from "./features/purchases/route";
 import { reportRoutes } from "./features/reports/route";
 import { DashboardView } from "./features/dashboard/views/DashboardView";
 import { userRoutes } from "./features/users/route";
+import { auditRoutes } from "./features/audit/route";
 
 export const router = createBrowserRouter([
     // public
@@ -36,13 +37,7 @@ export const router = createBrowserRouter([
                     ...purchaseRoutes,
                     ...reportRoutes,
                     ...userRoutes,
-
-                    // placeholders - for now
-
-                    {
-                        element: <ProtectedRoute requiredAuthority="AUDIT_READ" />,
-                        children: [{ path: "/audit", element: <AuditPage /> }],
-                    }
+                    ...auditRoutes,
                 ],
             },
         ],
