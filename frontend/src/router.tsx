@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { AppLayout } from "./core/layouts/AppLayout";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
-import { ForbiddenPage } from "./pages/modules/Placeholders";
+import { ForbiddenPage } from "./shared/components/ForbiddenPage";
 import { authRoutes } from "./features/auth/routes";
 import { customerRoutes } from "./features/customers/routes";
 import { productRoutes } from "./features/products/route";
