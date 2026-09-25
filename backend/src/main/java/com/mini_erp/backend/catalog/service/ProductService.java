@@ -88,7 +88,7 @@ public class ProductService {
         p.setCategory(findCategoryOrThrow(req.categoryId()));
         p.setWarehouse(findWarehouseOrThrow(req.warehouseId()));
         Product saved = products.save(p);
-        auditService.log(AuditAction.CREATE, AuditEntity.PRODUCT, saved.getId(), "Utworzono produkt: " + saved.getSku() + " " + saved.getName());
+        auditService.logJson(AuditAction.CREATE, AuditEntity.PRODUCT, saved.getId(), "Utworzono produkt: " + saved.getSku() + " " + saved.getName(), req);
         return mapper.toResponse(saved);
     }
 

@@ -44,7 +44,7 @@ public class SupplierService {
         Supplier s = mapper.toEntity(req);
         applyCountryDefault(s);
         Supplier saved = suppliers.save(s);
-        auditService.log(AuditAction.CREATE, AuditEntity.SUPPLIER, saved.getId(), "Utworzono dostawcę: " + saved.getName());
+        auditService.logJson(AuditAction.CREATE, AuditEntity.SUPPLIER, saved.getId(), "Utworzono dostawcę: " + saved.getName(), req);
         return mapper.toResponse(saved);
     }
 

@@ -60,7 +60,7 @@ public class CustomerService {
         }
 
         Customer c = customers.save(mapper.toEntity(req));
-        auditService.log(AuditAction.CREATE, AuditEntity.CUSTOMER, c.getId(), "Utworzono klienta: " + c.getName());
+        auditService.logJson(AuditAction.CREATE, AuditEntity.CUSTOMER, c.getId(), "Utworzono klienta: " + c.getName(), req);
 
         PayerAddress firstPayer = null;
         for (AddressRequest ar : req.payerAddresses()) {
