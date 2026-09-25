@@ -1,5 +1,8 @@
 package com.mini_erp.backend.sales.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.catalog.service.ProductService;
@@ -41,6 +44,7 @@ public class SalesOrderService {
     private final ProductService productService;
     private final ReceiverAddressRepository receiverAddresses;
     private final SalesOrderStatusHistoryRepository statusHistory;
+    private final AuditService auditService;
 
     public SalesOrderService(SalesOrderRepository orders,
                              SalesOrderItemRepository items,
@@ -49,7 +53,8 @@ public class SalesOrderService {
                              ProductRepository products,
                              ProductService productService,
                              ReceiverAddressRepository receiverAddresses,
-                             SalesOrderStatusHistoryRepository statusHistory) {
+                             SalesOrderStatusHistoryRepository statusHistory,
+                             AuditService auditService) {
         this.orders = orders;
         this.items = items;
         this.mapper = mapper;
@@ -58,6 +63,7 @@ public class SalesOrderService {
         this.productService = productService;
         this.receiverAddresses = receiverAddresses;
         this.statusHistory = statusHistory;
+        this.auditService = auditService;
     }
 
     private static final Map<SalesOrderStatus, Set<SalesOrderStatus>> ALLOWED = Map.of(
@@ -125,6 +131,9 @@ public class SalesOrderService {
         recomputeTotals(order);
         orders.save(order);
         logStatusChange(order.getId(), null, SalesOrderStatus.NEW);
+        auditService.log(AuditAction.CREATE, AuditEntity.SALES_ORDER, order.getId(),
+                "Utworzono zamówienie #" + order.getId() + " dla " + customer.getName()
+                        + " (" + order.getTotalGross() + " zł)");
         return mapper.toResponse(order, formatAddress(order.getReceiverAddressId()));
     }
 
@@ -139,9 +148,11 @@ public class SalesOrderService {
                         "Za mało towaru: " + p.getName() + ". Dostępne " + p.getStock() + ", zamówiono " + line.getQuantity());
             }
         }
-        logStatusChange(id, order.getStatus(), SalesOrderStatus.CONFIRMED);
+        SalesOrderStatus old = order.getStatus();
+        logStatusChange(id, old, SalesOrderStatus.CONFIRMED);
         order.setStatus(SalesOrderStatus.CONFIRMED);
         orders.save(order);
+        auditService.log(AuditAction.STATUS_CHANGE, AuditEntity.SALES_ORDER, id, "Status: " + old.label() + " → " + SalesOrderStatus.CONFIRMED.label());
     }
 
     @Transactional
@@ -152,11 +163,14 @@ public class SalesOrderService {
             productService.issueForOrder(line.getProductId(), line.getQuantity(),
                     "SALES_ORDER", order.getId());
         }
-        logStatusChange(id, order.getStatus(), SalesOrderStatus.PROCESSING);
+        SalesOrderStatus old = order.getStatus();
+        logStatusChange(id, old, SalesOrderStatus.PROCESSING);
         order.setStatus(SalesOrderStatus.PROCESSING);
         orders.save(order);
+        auditService.log(AuditAction.STATUS_CHANGE, AuditEntity.SALES_ORDER, id, "Status: " + old.label() + " → " + SalesOrderStatus.PROCESSING.label());
     }
 
+    @Transactional
     public void ready(Long id) { changeStatus(findOrThrow(id), SalesOrderStatus.READY); }
 
     @Transactional
@@ -170,9 +184,11 @@ public class SalesOrderService {
                         "SALES_ORDER", order.getId());
             }
         }
-        logStatusChange(id, order.getStatus(), SalesOrderStatus.CANCELLED);
+        SalesOrderStatus old = order.getStatus();
+        logStatusChange(id, old, SalesOrderStatus.CANCELLED);
         order.setStatus(SalesOrderStatus.CANCELLED);
         orders.save(order);
+        auditService.log(AuditAction.STATUS_CHANGE, AuditEntity.SALES_ORDER, id, "Status: " + old.label() + " → " + SalesOrderStatus.CANCELLED.label());
     }
 
     @Transactional
@@ -193,10 +209,11 @@ public class SalesOrderService {
 
     private void changeStatus(SalesOrder order, SalesOrderStatus target) {
         requireTransition(order.getStatus(), target);
-        logStatusChange(order.getId(), order.getStatus(), target);
+        SalesOrderStatus old = order.getStatus();
+        logStatusChange(order.getId(), old, target);
         order.setStatus(target);
         orders.save(order);
-    }
+        auditService.log(AuditAction.STATUS_CHANGE, AuditEntity.SALES_ORDER, order.getId(), "Status: " + old.label() + " → " + target.label());    }
 
     private void requireTransition(SalesOrderStatus from, SalesOrderStatus to) {
         if (!ALLOWED.get(from).contains(to)) {
@@ -228,7 +245,7 @@ public class SalesOrderService {
     private void logStatusChange(Long orderId, SalesOrderStatus from, SalesOrderStatus to) {
         SalesOrderStatusHistory h = new SalesOrderStatusHistory();
         h.setOrderId(orderId);
-        h.setFromStatus(from);   // null przy utworzeniu
+        h.setFromStatus(from);
         h.setToStatus(to);
         h.setChangedBy(currentUsername());
         statusHistory.save(h);

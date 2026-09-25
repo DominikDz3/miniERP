@@ -1,5 +1,6 @@
 package com.mini_erp.backend.catalog.service;
 
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.domain.Category;
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.domain.VatRate;
@@ -42,6 +43,7 @@ class ProductServiceTest {
     @Mock StockMovementRepository stockMovements;
     @Spy ProductMapper mapper = Mappers.getMapper(ProductMapper.class);
     @InjectMocks ProductService service;
+    @Mock AuditService auditService;
 
     private Category category() {
         Category c = new Category();

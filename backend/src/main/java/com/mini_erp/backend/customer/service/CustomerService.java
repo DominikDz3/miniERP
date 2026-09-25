@@ -1,5 +1,8 @@
 package com.mini_erp.backend.customer.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.customer.domain.Customer;
 import com.mini_erp.backend.customer.domain.PayerAddress;
 import com.mini_erp.backend.customer.domain.ReceiverAddress;
@@ -21,15 +24,18 @@ public class CustomerService {
     private final CustomerMapper mapper;
     private final PayerAddressService payerService;
     private final ReceiverAddressService receiverService;
+    private final AuditService auditService;
 
     public CustomerService(CustomerRepository customers,
                            CustomerMapper mapper,
                            PayerAddressService payerService,
-                           ReceiverAddressService receiverService) {
+                           ReceiverAddressService receiverService,
+                           AuditService auditService) {
         this.customers = customers;
         this.mapper = mapper;
         this.payerService = payerService;
         this.receiverService = receiverService;
+        this.auditService = auditService;
     }
 
     @Transactional(readOnly = true)
@@ -54,6 +60,7 @@ public class CustomerService {
         }
 
         Customer c = customers.save(mapper.toEntity(req));
+        auditService.log(AuditAction.CREATE, AuditEntity.CUSTOMER, c.getId(), "Utworzono klienta: " + c.getName());
 
         PayerAddress firstPayer = null;
         for (AddressRequest ar : req.payerAddresses()) {
@@ -75,7 +82,9 @@ public class CustomerService {
     public CustomerResponse update(Long id, CustomerRequest req) {   // scalars only
         Customer c = findOrThrow(id);
         mapper.updateScalars(req, c);
-        return mapper.toResponse(customers.save(c));
+        Customer saved = customers.save(c);
+        auditService.logJson(AuditAction.UPDATE, AuditEntity.CUSTOMER, saved.getId(), "Zaktualizowano klienta", req);
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -83,6 +92,7 @@ public class CustomerService {
         Customer c = findOrThrow(id);
         c.setActive(true);
         customers.save(c);
+        auditService.log(AuditAction.ACTIVATE, AuditEntity.CUSTOMER, id, "Aktywowano klienta: " + c.getName());
     }
 
     @Transactional
@@ -90,7 +100,7 @@ public class CustomerService {
         Customer c = findOrThrow(id);
         c.setActive(false);
         customers.save(c);
-    }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.CUSTOMER, id, "Dezaktywowano klienta: " + c.getName());   }
 
     private Customer findOrThrow(Long id) {
         return customers.findById(id)

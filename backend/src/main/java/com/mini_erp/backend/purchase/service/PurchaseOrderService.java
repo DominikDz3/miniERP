@@ -1,5 +1,8 @@
 package com.mini_erp.backend.purchase.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.catalog.service.ProductService;
@@ -45,6 +48,7 @@ public class PurchaseOrderService {
     private final WarehouseRepository warehouses;
     private final ProductRepository products;
     private final ProductService productService;
+    private final AuditService auditService;
 
     public PurchaseOrderService(PurchaseOrderRepository orders,
                                 PurchaseOrderItemRepository items,
@@ -53,7 +57,8 @@ public class PurchaseOrderService {
                                 SupplierRepository suppliers,
                                 WarehouseRepository warehouses,
                                 ProductRepository products,
-                                ProductService productService) {
+                                ProductService productService,
+                                AuditService auditService) {
         this.orders = orders;
         this.items = items;
         this.statusHistory = statusHistory;
@@ -62,6 +67,7 @@ public class PurchaseOrderService {
         this.warehouses = warehouses;
         this.products = products;
         this.productService = productService;
+        this.auditService = auditService;
     }
 
     private static final Map<PurchaseOrderStatus, Set<PurchaseOrderStatus>> ALLOWED = Map.of(
@@ -134,6 +140,9 @@ public class PurchaseOrderService {
 
         recomputeTotals(order);
         logStatusChange(order.getId(), null, PurchaseOrderStatus.NEW);
+        auditService.log(AuditAction.CREATE, AuditEntity.PURCHASE_ORDER, order.getId(),
+                "Utworzono zamówienie zakupu #" + order.getId() + " do " + supplier.getName()
+                        + " (" + order.getTotalGross() + " zł)");
         return mapper.toResponse(orders.save(order));
     }
 
@@ -155,9 +164,11 @@ public class PurchaseOrderService {
                     "PURCHASE_ORDER",
                     order.getId());
         }
-        logStatusChange(id, order.getStatus(), PurchaseOrderStatus.RECEIVED);
+        PurchaseOrderStatus old = order.getStatus();
+        logStatusChange(id, old, PurchaseOrderStatus.RECEIVED);
         order.setStatus(PurchaseOrderStatus.RECEIVED);
         orders.save(order);
+        auditService.log(AuditAction.STATUS_CHANGE, AuditEntity.PURCHASE_ORDER, id, "Status: " + old.label() + " → " + PurchaseOrderStatus.RECEIVED.label());
     }
 
     @Transactional
@@ -170,10 +181,11 @@ public class PurchaseOrderService {
 
     private void changeStatus(PurchaseOrder order, PurchaseOrderStatus target) {
         requireTransition(order.getStatus(), target);
-        logStatusChange(order.getId(), order.getStatus(), target);
+        PurchaseOrderStatus old = order.getStatus();
+        logStatusChange(order.getId(), old, target);
         order.setStatus(target);
         orders.save(order);
-    }
+        auditService.log(AuditAction.STATUS_CHANGE, AuditEntity.PURCHASE_ORDER, order.getId(), "Status: " + old.label() + " → " + target.label());    }
 
     private void requireTransition(PurchaseOrderStatus from, PurchaseOrderStatus to) {
         if (!ALLOWED.get(from).contains(to)) {

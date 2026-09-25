@@ -1,5 +1,6 @@
 package com.mini_erp.backend.supplier.service;
 
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.supplier.domain.Supplier;
 import com.mini_erp.backend.shared.mappers.SupplierMapper;
 import com.mini_erp.backend.supplier.repository.SupplierRepository;
@@ -24,10 +25,11 @@ class SupplierServiceTest {
     @Mock SupplierRepository suppliers;
     final SupplierMapper mapper = Mappers.getMapper(SupplierMapper.class);
     SupplierService service;
+    @Mock AuditService auditService;
 
     @BeforeEach
     void setUp() {
-        service = new SupplierService(suppliers, mapper);
+        service = new SupplierService(suppliers, mapper, auditService);
     }
 
     private SupplierRequest request() {

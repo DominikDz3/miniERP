@@ -1,5 +1,8 @@
 package com.mini_erp.backend.warehouse.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.warehouse.domain.Warehouse;
 import com.mini_erp.backend.shared.mappers.WarehouseMapper;
@@ -17,11 +20,13 @@ public class WarehouseService {
     private final WarehouseRepository warehouses;
     private final WarehouseMapper mapper;
     private final ProductRepository products;
+    private final AuditService auditService;
 
-    public WarehouseService(WarehouseRepository warehouses, WarehouseMapper mapper, ProductRepository products) {
+    public WarehouseService(WarehouseRepository warehouses, WarehouseMapper mapper, ProductRepository products, AuditService auditService) {
         this.warehouses = warehouses;
         this.mapper = mapper;
         this.products = products;
+        this.auditService = auditService;
     }
 
     @Transactional(readOnly = true)
@@ -41,7 +46,9 @@ public class WarehouseService {
         }
         Warehouse w = mapper.toEntity(req);
         applyCountryDefault(w);
-        return mapper.toResponse(warehouses.save(w));
+        Warehouse saved = warehouses.save(w);
+        auditService.log(AuditAction.CREATE, AuditEntity.WAREHOUSE, saved.getId(), "Utworzono magazyn: " + saved.getName());
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -49,12 +56,16 @@ public class WarehouseService {
         Warehouse w = findOrThrow(id);
         mapper.update(req, w);
         applyCountryDefault(w);
+        auditService.logJson(AuditAction.UPDATE, AuditEntity.WAREHOUSE, id, "Zaktualizowano magazyn", req);
         return mapper.toResponse(w);
     }
 
     @Transactional
     public void activate(Long id) {
-        findOrThrow(id).setActive(true);
+        Warehouse w = findOrThrow(id);
+        w.setActive(true);
+        warehouses.save(w);
+        auditService.log(AuditAction.ACTIVATE, AuditEntity.WAREHOUSE, id, "Aktywowano magazyn: " + w.getName());
     }
 
     @Transactional
@@ -66,7 +77,7 @@ public class WarehouseService {
                     "Nie można dezaktywować magazynu z aktywnymi produktami. Najpierw przenieś lub dezaktywuj towar");
         }
         w.setActive(false);
-    }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.WAREHOUSE, id, "Dezaktywowano magazyn: " + w.getName());    }
 
     private Warehouse findOrThrow(Long id) {
         return warehouses.findById(id)

@@ -1,5 +1,8 @@
 package com.mini_erp.backend.catalog.service;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.domain.AuditEntity;
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.catalog.domain.Category;
 import com.mini_erp.backend.catalog.domain.Product;
 import com.mini_erp.backend.shared.mappers.ProductMapper;
@@ -33,19 +36,22 @@ public class ProductService {
     private final WarehouseRepository warehouses;
     private final StockMovementRepository stockMovements;
     private final ProductMapper mapper;
+    private final AuditService auditService;
 
     public ProductService(ProductRepository products,
                           CategoryRepository categories,
                           PriceHistoryRepository priceHistory,
                           WarehouseRepository warehouses,
                           StockMovementRepository stockMovements,
-                          ProductMapper mapper) {
+                          ProductMapper mapper,
+                          AuditService auditService) {
         this.products = products;
         this.categories = categories;
         this.priceHistory = priceHistory;
         this.warehouses = warehouses;
         this.stockMovements = stockMovements;
         this.mapper = mapper;
+        this.auditService = auditService;
     }
 
     @Transactional(readOnly = true)
@@ -81,7 +87,9 @@ public class ProductService {
         Product p = mapper.toEntity(req);
         p.setCategory(findCategoryOrThrow(req.categoryId()));
         p.setWarehouse(findWarehouseOrThrow(req.warehouseId()));
-        return mapper.toResponse(products.save(p));
+        Product saved = products.save(p);
+        auditService.log(AuditAction.CREATE, AuditEntity.PRODUCT, saved.getId(), "Utworzono produkt: " + saved.getSku() + " " + saved.getName());
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -90,7 +98,9 @@ public class ProductService {
         mapper.update(req, p);
         p.setCategory(findCategoryOrThrow(req.categoryId()));
         p.setWarehouse(findWarehouseOrThrow(req.warehouseId()));
-        return mapper.toResponse(products.save(p));
+        Product saved = products.save(p);
+        auditService.logJson(AuditAction.UPDATE, AuditEntity.PRODUCT, saved.getId(), "Zaktualizowano produkt", req);
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -157,6 +167,7 @@ public class ProductService {
         Product p = findOrThrow(id);
         p.setActive(true);
         products.save(p);
+        auditService.log(AuditAction.ACTIVATE, AuditEntity.PRODUCT, id, "Aktywowano produkt: " + p.getName());
     }
 
     @Transactional
@@ -164,7 +175,7 @@ public class ProductService {
         Product p = findOrThrow(id);
         p.setActive(false);
         products.save(p);
-    }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.PRODUCT, id, "Dezaktywowano produkt: " + p.getName());    }
 
     // helpers
 
@@ -229,6 +240,7 @@ public class ProductService {
         m.setSourceId(sourceId);
         m.setPerformedBy(currentUsername());
         stockMovements.save(m);
+        auditService.log(AuditAction.STOCK_MOVEMENT, AuditEntity.PRODUCT, p.getId(), type + " " + quantity + " szt: " + p.getName());
     }
 
     private String currentUsername() {

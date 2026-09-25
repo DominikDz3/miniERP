@@ -1,5 +1,7 @@
 package com.mini_erp.backend.auth.web;
 
+import com.mini_erp.backend.audit.domain.AuditAction;
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.auth.service.JwtService;
 import com.mini_erp.backend.auth.web.dto.LoginResponse;
 import com.mini_erp.backend.auth.web.dto.LoginRequest;
@@ -10,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
@@ -24,21 +27,30 @@ public class AuthController {
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final AuditService auditService;
 
-    public AuthController(AuthenticationManager authManager, JwtService jwtService, UserDetailsService userDetailsService) {
+    public AuthController(AuthenticationManager authManager, JwtService jwtService, UserDetailsService userDetailsService, AuditService auditService) {
         this.authManager = authManager;
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.auditService = auditService;
     }
 
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-        var authentication = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-        var user = (UserDetails) authentication.getPrincipal();
+        String username = request.username().trim().toLowerCase();
+        try {
+            var authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+            var user = (UserDetails) authentication.getPrincipal();
 
-        response.addCookie(refreshCookie(jwtService.generateRefreshToken(user), REFRESH_MAX_AGE));
-        return new LoginResponse(jwtService.generateToken(user));
+            auditService.log(AuditAction.LOGIN_SUCCESS, null, null, "Zalogowano: " + username, username);
+            response.addCookie(refreshCookie(jwtService.generateRefreshToken(user), REFRESH_MAX_AGE));
+            return new LoginResponse(jwtService.generateToken(user));
+        } catch (AuthenticationException e) {
+            auditService.log(AuditAction.LOGIN_FAILED, null, null, "Nieudane logowanie: " + username);
+            throw e;
+        }
     }
 
     @PostMapping("/refresh")

@@ -1,5 +1,6 @@
 package com.mini_erp.backend.customer.service;
 
+import com.mini_erp.backend.audit.service.AuditService;
 import com.mini_erp.backend.customer.domain.Customer;
 import com.mini_erp.backend.customer.domain.PayerAddress;
 import com.mini_erp.backend.customer.domain.ReceiverAddress;
@@ -33,6 +34,7 @@ class CustomerServiceTest {
     @Mock PayerAddressService payerService;
     @Mock ReceiverAddressService receiverService;
     @InjectMocks CustomerService service;
+    @Mock AuditService auditService;
 
     private AddressRequest payerAddr() {
         return new AddressRequest("ul. Główna 1", "Warszawa", "00-001", "Polska", null);
