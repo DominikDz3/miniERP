@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tansta
 import { apiFetch } from "@/shared/services/apiClient";
 import type {
   CategoryResponse, CategoryRequest, CategoryListParams,
-  ProductResponse, ProductRequest, ProductListParams,
+  ProductResponse, ProductRequest, ProductUpdateRequest, ProductListParams,
   PriceHistoryResponse, Page,
 } from "../types/catalog";
 
@@ -120,7 +120,7 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, body }: { id: number; body: ProductRequest }) =>
+    mutationFn: ({ id, body }: { id: number; body: ProductUpdateRequest }) =>
       apiFetch<ProductResponse>(`/products/${id}`, { method: "PUT", body: JSON.stringify(body) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all }),
   });
@@ -173,4 +173,3 @@ export function useTransferProduct() {
     onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all }),
   });
 }
-

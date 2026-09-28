@@ -12,6 +12,7 @@ import com.mini_erp.backend.catalog.repository.CategoryRepository;
 import com.mini_erp.backend.catalog.web.dto.PriceHistoryResponse;
 import com.mini_erp.backend.catalog.web.dto.ProductRequest;
 import com.mini_erp.backend.catalog.web.dto.ProductResponse;
+import com.mini_erp.backend.catalog.web.dto.ProductUpdateRequest;
 import com.mini_erp.backend.catalog.web.dto.StockItemsRequest;
 import com.mini_erp.backend.shared.exception.NotFoundException;
 import com.mini_erp.backend.warehouse.domain.StockMovement;
@@ -93,13 +94,12 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse update(Long id, ProductRequest req) {
+    public ProductResponse update(Long id, ProductUpdateRequest req) {
         Product p = findOrThrow(id);
         mapper.update(req, p);
         p.setCategory(findCategoryOrThrow(req.categoryId()));
-        p.setWarehouse(findWarehouseOrThrow(req.warehouseId()));
         Product saved = products.save(p);
-        auditService.logJson(AuditAction.UPDATE, AuditEntity.PRODUCT, saved.getId(), "Zaktualizowano produkt", req);
+        auditService.logJson(AuditAction.UPDATE, AuditEntity.PRODUCT, saved.getId(), "Zaktualizowano produkt: " + saved.getSku() + " " + saved.getName(), req);
         return mapper.toResponse(saved);
     }
 
@@ -175,7 +175,8 @@ public class ProductService {
         Product p = findOrThrow(id);
         p.setActive(false);
         products.save(p);
-        auditService.log(AuditAction.DEACTIVATE, AuditEntity.PRODUCT, id, "Dezaktywowano produkt: " + p.getName());    }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.PRODUCT, id, "Dezaktywowano produkt: " + p.getName());
+    }
 
     // helpers
 

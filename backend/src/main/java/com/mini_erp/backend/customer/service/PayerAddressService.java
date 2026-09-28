@@ -31,7 +31,7 @@ public class PayerAddressService {
     @Transactional(readOnly = true)
     public List<AddressResponse> list(Long customerId) {
         Customer c = customer(customerId);
-        return payers.findByCustomerIdOrderById(customerId).stream()
+        return payers.findByCustomerIdAndActiveTrueOrderById(customerId).stream()
                 .map(a -> mapper.toResponse(a, a.getId().equals(c.getDefaultPayerId())))
                 .toList();
     }
@@ -57,22 +57,34 @@ public class PayerAddressService {
     }
 
     @Transactional
+    public AddressResponse update(Long customerId, Long addressId, AddressRequest req) {
+        Customer c = customer(customerId);
+        PayerAddress old = findActiveOwned(customerId, addressId);
+
+        PayerAddress created = add(customerId, req);
+        old.setActive(false);
+        payers.save(old);
+
+        if (old.getId().equals(c.getDefaultPayerId())) {
+            c.setDefaultPayerId(created.getId());
+            customers.save(c);
+        }
+        return mapper.toResponse(created, created.getId().equals(c.getDefaultPayerId()));
+    }
+
+    @Transactional
     public void remove(Long customerId, Long addressId) {
         Customer c = customer(customerId);
-        PayerAddress a = payers.findById(addressId)
-                .filter(p -> p.getCustomerId().equals(customerId))
-                .orElseThrow(() -> new NotFoundException("Nie znaleziono adresu płatnika: " + addressId));
-        if (payers.countByCustomerId(customerId) == 1) {
+        PayerAddress a = findActiveOwned(customerId, addressId);
+        if (payers.countByCustomerIdAndActiveTrue(customerId) == 1) {
             throw new IllegalArgumentException("Klient musi mieć co najmniej jeden adres płatnika");
         }
-        boolean wasDefault = a.getId().equals(c.getDefaultPayerId());
-        if (wasDefault) {
-            c.setDefaultPayerId(null);
-            customers.saveAndFlush(c);      // release FK before delete
-        }
-        payers.delete(a);
-        if (wasDefault) {
-            c.setDefaultPayerId(payers.findByCustomerIdOrderById(customerId).get(0).getId());
+        a.setActive(false);
+        payers.save(a);
+
+        if (a.getId().equals(c.getDefaultPayerId())) {
+            PayerAddress next = payers.findByCustomerIdAndActiveTrueOrderById(customerId).get(0);
+            c.setDefaultPayerId(next.getId());
             customers.save(c);
         }
     }
@@ -80,11 +92,16 @@ public class PayerAddressService {
     @Transactional
     public void setDefault(Long customerId, Long addressId) {
         Customer c = customer(customerId);
-        boolean owns = payers.findById(addressId)
-                .map(p -> p.getCustomerId().equals(customerId)).orElse(false);
-        if (!owns) throw new NotFoundException("Adres płatnika nie należy do klienta: " + addressId);
+        findActiveOwned(customerId, addressId);
         c.setDefaultPayerId(addressId);
         customers.save(c);
+    }
+
+    private PayerAddress findActiveOwned(Long customerId, Long addressId) {
+        return payers.findById(addressId)
+                .filter(p -> p.getCustomerId().equals(customerId))
+                .filter(p -> p.isActive())
+                .orElseThrow(() -> new NotFoundException("Nie znaleziono adresu płatnika: " + addressId));
     }
 
     private Customer customer(Long id) {

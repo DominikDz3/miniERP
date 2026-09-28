@@ -9,6 +9,7 @@ import com.mini_erp.backend.customer.repository.CustomerRepository;
 import com.mini_erp.backend.customer.web.dto.AddressRequest;
 import com.mini_erp.backend.customer.web.dto.CustomerRequest;
 import com.mini_erp.backend.customer.web.dto.CustomerResponse;
+import com.mini_erp.backend.customer.web.dto.CustomerUpdateRequest;
 import com.mini_erp.backend.shared.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +49,10 @@ class CustomerServiceTest {
         return new CustomerRequest(
                 "Firma Kowalski", "1234567890", "kontakt@firma.pl",
                 List.of(payerAddr()), List.of(receiverAddr()));
+    }
+
+    private CustomerUpdateRequest updateRequest() {
+        return new CustomerUpdateRequest("Firma Kowalski Sp. z o.o.", "1234567890", "nowy@firma.pl");
     }
 
     private Customer entity() {
@@ -137,7 +142,7 @@ class CustomerServiceTest {
     void update_throwsWhenNotFound() {
         when(customers.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.update(99L, request()))
+        assertThatThrownBy(() -> service.update(99L, updateRequest()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("99");
 
@@ -150,14 +155,26 @@ class CustomerServiceTest {
         when(customers.findById(10L)).thenReturn(Optional.of(existing));
         when(customers.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        CustomerRequest req = new CustomerRequest(
-                "Firma Kowalski Sp. z o.o.", "1234567890", "nowy@firma.pl",
-                List.of(payerAddr()), List.of(receiverAddr()));
-
-        CustomerResponse res = service.update(10L, req);
+        CustomerResponse res = service.update(10L, updateRequest());
 
         assertThat(res.name()).isEqualTo("Firma Kowalski Sp. z o.o.");
         assertThat(res.email()).isEqualTo("nowy@firma.pl");
+        verify(customers, never()).existsByNip(any());
+    }
+
+    @Test
+    void update_throwsWhenNewNipBelongsToAnotherCustomer() {
+        Customer existing = entity();
+        when(customers.findById(10L)).thenReturn(Optional.of(existing));
+        when(customers.existsByNip("9999999999")).thenReturn(true);
+
+        CustomerUpdateRequest req = new CustomerUpdateRequest("Firma Kowalski", "9999999999", "kontakt@firma.pl");
+
+        assertThatThrownBy(() -> service.update(10L, req))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("9999999999");
+
+        verify(customers, never()).save(any());
     }
 
     // deactivate

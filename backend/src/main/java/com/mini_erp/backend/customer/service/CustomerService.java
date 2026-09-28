@@ -11,6 +11,7 @@ import com.mini_erp.backend.customer.repository.CustomerRepository;
 import com.mini_erp.backend.customer.web.dto.AddressRequest;
 import com.mini_erp.backend.customer.web.dto.CustomerRequest;
 import com.mini_erp.backend.customer.web.dto.CustomerResponse;
+import com.mini_erp.backend.customer.web.dto.CustomerUpdateRequest;
 import com.mini_erp.backend.shared.exception.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,8 +80,14 @@ public class CustomerService {
     }
 
     @Transactional
-    public CustomerResponse update(Long id, CustomerRequest req) {   // scalars only
+    public CustomerResponse update(Long id, CustomerUpdateRequest req) {   // scalars only
         Customer c = findOrThrow(id);
+
+        boolean nipChanged = req.nip() != null && !req.nip().equals(c.getNip());
+        if (nipChanged && customers.existsByNip(req.nip())) {
+            throw new IllegalArgumentException("NIP już istnieje: " + req.nip());
+        }
+
         mapper.updateScalars(req, c);
         Customer saved = customers.save(c);
         auditService.logJson(AuditAction.UPDATE, AuditEntity.CUSTOMER, saved.getId(), "Zaktualizowano klienta", req);
@@ -100,7 +107,8 @@ public class CustomerService {
         Customer c = findOrThrow(id);
         c.setActive(false);
         customers.save(c);
-        auditService.log(AuditAction.DEACTIVATE, AuditEntity.CUSTOMER, id, "Dezaktywowano klienta: " + c.getName());   }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.CUSTOMER, id, "Dezaktywowano klienta: " + c.getName());
+    }
 
     private Customer findOrThrow(Long id) {
         return customers.findById(id)

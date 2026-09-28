@@ -28,4 +28,7 @@ public class PayerAddress {
 
     @Column(nullable = false, length = 60)
     private String country;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }

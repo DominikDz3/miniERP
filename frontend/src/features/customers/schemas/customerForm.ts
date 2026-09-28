@@ -7,10 +7,14 @@ const payerSchema = z.object({
   country: z.string().max(60).optional(),
 });
 
-const baseFields = {
+const dataFields = {
   name: z.string().min(1, "Nazwa jest wymagana").max(200),
   nip: z.string().regex(/^\d{10}$/, "NIP musi mieć 10 cyfr").optional().or(z.literal("")),
   email: z.string().min(1, "E-mail jest wymagany").email("Nieprawidłowy e-mail").max(150),
+};
+
+const baseFields = {
+  ...dataFields,
   payer: payerSchema,
 };
 
@@ -33,4 +37,7 @@ export const customerFormSchema = z.discriminatedUnion("sameAsPayer", [
   }),
 ]);
 
+export const customerEditSchema = z.object(dataFields);
+
 export type CustomerFormValues = z.infer<typeof customerFormSchema>;
+export type CustomerEditValues = z.infer<typeof customerEditSchema>;

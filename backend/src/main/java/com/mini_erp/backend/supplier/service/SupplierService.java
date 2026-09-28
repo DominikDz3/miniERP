@@ -51,6 +51,12 @@ public class SupplierService {
     @Transactional
     public SupplierResponse update(Long id, SupplierRequest req) {
         Supplier s = findOrThrow(id);
+
+        boolean nipChanged = !req.nip().equals(s.getNip());
+        if (nipChanged && suppliers.existsByNip(req.nip())) {
+            throw new IllegalArgumentException("NIP już istnieje: " + req.nip());
+        }
+
         mapper.update(req, s);
         applyCountryDefault(s);
         auditService.logJson(AuditAction.UPDATE, AuditEntity.SUPPLIER, id, "Zaktualizowano dostawcę", req);
@@ -70,7 +76,8 @@ public class SupplierService {
         Supplier s = findOrThrow(id);
         s.setActive(false);
         suppliers.save(s);
-        auditService.log(AuditAction.DEACTIVATE, AuditEntity.SUPPLIER, id, "Dezaktywowano dostawcę: " + s.getName());    }
+        auditService.log(AuditAction.DEACTIVATE, AuditEntity.SUPPLIER, id, "Dezaktywowano dostawcę: " + s.getName());
+    }
 
     private Supplier findOrThrow(Long id) {
         return suppliers.findById(id)

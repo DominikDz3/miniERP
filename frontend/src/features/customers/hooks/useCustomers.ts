@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { apiFetch } from '@/shared/services/apiClient';
 import type {
-    CustomerResponse, CustomerRequest, AddressResponse, 
+    CustomerResponse, CustomerRequest, CustomerUpdateRequest, AddressResponse,
     AddressRequest, Page, CustomerListParams
 } from '../types/customer';
 
@@ -76,7 +76,7 @@ export function useCreateCustomer() {
 export function useUpdateCustomer() {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: ({id, body}: {id: number; body: CustomerRequest }) =>
+        mutationFn: ({id, body}: {id: number; body: CustomerUpdateRequest }) =>
             apiFetch<CustomerResponse>(`/customers/${id}`, {method: "PUT", body: JSON.stringify(body) }),
         onSuccess: () => qc.invalidateQueries({ queryKey: keys.all })
     });
@@ -116,6 +116,42 @@ export function useAddReceiver() {
   });
 }
 
+export function useUpdatePayer() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, addressId, body }: { id: number; addressId: number; body: AddressRequest }) =>
+            apiFetch<AddressResponse>(`/customers/${id}/payer-addresses/${addressId}`, { method: "PUT", body: JSON.stringify(body) }),
+        onSuccess: () => qc.invalidateQueries({ queryKey: keys.all }),
+    });
+}
+
+export function useUpdateReceiver() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, addressId, body }: { id: number; addressId: number; body: AddressRequest }) =>
+            apiFetch<AddressResponse>(`/customers/${id}/receiver-addresses/${addressId}`, { method: "PUT", body: JSON.stringify(body) }),
+        onSuccess: () => qc.invalidateQueries({ queryKey: keys.all }),
+    });
+}
+
+export function useRemovePayer() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, addressId }: { id: number; addressId: number }) =>
+            apiFetch<void>(`/customers/${id}/payer-addresses/${addressId}`, { method: "DELETE" }),
+        onSuccess: () => qc.invalidateQueries({ queryKey: keys.all }),
+    });
+}
+
+export function useRemoveReceiver() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, addressId }: { id: number; addressId: number }) =>
+            apiFetch<void>(`/customers/${id}/receiver-addresses/${addressId}`, { method: "DELETE" }),
+        onSuccess: () => qc.invalidateQueries({ queryKey: keys.all }),
+    });
+}
+
 export function useSetDefaultPayer() {
     const qc = useQueryClient();
     return useMutation({
@@ -133,4 +169,3 @@ export function useSetDefaultReceiver() {
         onSuccess: () => qc.invalidateQueries({ queryKey: keys.all }),
     });
 }
-

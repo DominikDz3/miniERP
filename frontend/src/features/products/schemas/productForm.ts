@@ -14,4 +14,11 @@ export const productFormSchema = z.object({
   minStock: z.number().int().nonnegative("Minimum nie może być ujemne"),
 });
 
+export const productEditSchema = productFormSchema.omit({
+  sku: true,
+  warehouseId: true,
+  stock: true,
+});
+
 export type ProductFormValues = z.infer<typeof productFormSchema>;
+export type ProductEditValues = z.infer<typeof productEditSchema>;

@@ -10,6 +10,7 @@ import com.mini_erp.backend.catalog.repository.PriceHistoryRepository;
 import com.mini_erp.backend.catalog.repository.ProductRepository;
 import com.mini_erp.backend.catalog.web.dto.ProductRequest;
 import com.mini_erp.backend.catalog.web.dto.ProductResponse;
+import com.mini_erp.backend.catalog.web.dto.ProductUpdateRequest;
 import com.mini_erp.backend.shared.exception.NotFoundException;
 import com.mini_erp.backend.warehouse.domain.Warehouse;
 import com.mini_erp.backend.warehouse.repository.StockMovementRepository;
@@ -68,6 +69,29 @@ class ProductServiceTest {
                 VatRate.VAT_23, "szt", 5, 1);
     }
 
+    private ProductUpdateRequest updateRequest() {
+        return new ProductUpdateRequest(
+                "Wiertarka Pro", "nowy opis", 1L,
+                new BigDecimal("120.00"), new BigDecimal("180.00"),
+                VatRate.VAT_8, "szt", 2);
+    }
+
+    private Product existingProduct() {
+        Product p = new Product();
+        p.setId(10L);
+        p.setSku("SKU-1");
+        p.setName("Wiertarka");
+        p.setCategory(category());
+        p.setWarehouse(warehouse());
+        p.setPurchasePrice(new BigDecimal("100.00"));
+        p.setSalePrice(new BigDecimal("150.00"));
+        p.setVatRate(VatRate.VAT_23);
+        p.setUnit("szt");
+        p.setStock(5);
+        p.setMinStock(1);
+        return p;
+    }
+
     // create
     @Test
     void create_whenSkuExistsInWarehouse_throwsAndDoesNotSave() {
@@ -118,6 +142,43 @@ class ProductServiceTest {
 
         assertThatThrownBy(() -> service.get(99L))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    // update
+    @Test
+    void update_whenProductNotFound_throwsAndDoesNotSave() {
+        when(products.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.update(99L, updateRequest()))
+                .isInstanceOf(NotFoundException.class);
+        verify(products, never()).save(any());
+    }
+
+    @Test
+    void update_whenValid_changesCatalogDataAndKeepsSkuWarehouseAndStock() {
+        when(products.findById(10L)).thenReturn(Optional.of(existingProduct()));
+        when(categories.findById(1L)).thenReturn(Optional.of(category()));
+        when(products.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ProductResponse res = service.update(10L, updateRequest());
+
+        assertThat(res.name()).isEqualTo("Wiertarka Pro");
+        assertThat(res.salePrice()).isEqualByComparingTo("180.00");
+        assertThat(res.vatRate()).isEqualTo(VatRate.VAT_8);
+        assertThat(res.minStock()).isEqualTo(2);
+        assertThat(res.sku()).isEqualTo("SKU-1");
+        assertThat(res.warehouseId()).isEqualTo(2L);
+        assertThat(res.stock()).isEqualTo(5);
+    }
+
+    @Test
+    void update_whenCategoryNotFound_throwsAndDoesNotSave() {
+        when(products.findById(10L)).thenReturn(Optional.of(existingProduct()));
+        when(categories.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.update(10L, updateRequest()))
+                .isInstanceOf(NotFoundException.class);
+        verify(products, never()).save(any());
     }
 
     // deactivate (soft-delete)

@@ -35,6 +35,12 @@ export interface CustomerRequest {
     receiverAddresses: AddressRequest[];
 }
 
+export interface CustomerUpdateRequest {
+    name: string;
+    nip?: string;
+    email: string;
+}
+
 export interface Page<T> {
     content: T[];
     totalElements: number;

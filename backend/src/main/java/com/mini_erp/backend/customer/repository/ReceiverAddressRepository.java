@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ReceiverAddressRepository extends JpaRepository<ReceiverAddress, Long> {
-    List<ReceiverAddress> findByCustomerIdOrderById(Long customerId);
-    long countByCustomerId(Long customerId);
+    List<ReceiverAddress> findByCustomerIdAndActiveTrueOrderById(Long customerId);
+    long countByCustomerIdAndActiveTrue(Long customerId);
 }

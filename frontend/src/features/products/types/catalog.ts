@@ -46,6 +46,18 @@ export interface ProductRequest {
   minStock: number;
 }
 
+// edycja - bez SKU, magazynu i stanu (stan zmieniają tylko ruchy magazynowe)
+export interface ProductUpdateRequest {
+  name: string;
+  description?: string;
+  categoryId: number;
+  purchasePrice: number;
+  salePrice: number;
+  vatRate: VatRate;
+  unit: string;
+  minStock: number;
+}
+
 export interface PriceHistoryResponse {
   id: number;
   oldPurchasePrice: number | null;

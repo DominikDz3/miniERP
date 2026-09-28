@@ -7,6 +7,7 @@ import com.mini_erp.backend.customer.web.dto.AddressRequest;
 import com.mini_erp.backend.customer.web.dto.AddressResponse;
 import com.mini_erp.backend.customer.web.dto.CustomerRequest;
 import com.mini_erp.backend.customer.web.dto.CustomerResponse;
+import com.mini_erp.backend.customer.web.dto.CustomerUpdateRequest;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -58,7 +59,7 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('CLIENT_WRITE')")
-    public CustomerResponse update(@PathVariable Long id, @Valid @RequestBody CustomerRequest req) {
+    public CustomerResponse update(@PathVariable Long id, @Valid @RequestBody CustomerUpdateRequest req) {
         return customerService.update(id, req);
     }
 
@@ -85,6 +86,13 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.CREATED)
     public AddressResponse addPayer(@PathVariable Long id, @Valid @RequestBody AddressRequest req) {
         return payerService.addAndRespond(id, req);
+    }
+
+    @PutMapping("/{id}/payer-addresses/{addressId}")
+    @PreAuthorize("hasAuthority('CLIENT_WRITE')")
+    public AddressResponse updatePayer(@PathVariable Long id, @PathVariable Long addressId,
+                                       @Valid @RequestBody AddressRequest req) {
+        return payerService.update(id, addressId, req);
     }
 
     @DeleteMapping("/{id}/payer-addresses/{addressId}")
@@ -114,6 +122,13 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.CREATED)
     public AddressResponse addReceiver(@PathVariable Long id, @Valid @RequestBody AddressRequest req) {
         return receiverService.addAndRespond(id, req);
+    }
+
+    @PutMapping("/{id}/receiver-addresses/{addressId}")
+    @PreAuthorize("hasAuthority('CLIENT_WRITE')")
+    public AddressResponse updateReceiver(@PathVariable Long id, @PathVariable Long addressId,
+                                          @Valid @RequestBody AddressRequest req) {
+        return receiverService.update(id, addressId, req);
     }
 
     @DeleteMapping("/{id}/receiver-addresses/{addressId}")
