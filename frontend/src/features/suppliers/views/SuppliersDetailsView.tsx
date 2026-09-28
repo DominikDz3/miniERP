@@ -4,6 +4,7 @@ import { useSupplier, useDeactivateSupplier, useActivateSupplier } from "@/featu
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { ConfirmModal } from "@/shared/components/ConfirmModal";
 import { SupplierOrderHistory } from "@/features/suppliers/components/SupplierOrderHistory";
+import { EditSupplierModal } from "../components/EditSuppliermodal";
 
 const cardCls = "bg-white rounded-xl shadow-sm border border-gray-100 p-5";
 const sectionTitleCls = "text-sm font-medium text-gray-500 mb-3";
@@ -19,6 +20,7 @@ export function SupplierDetailsView() {
   const deactivate = useDeactivateSupplier();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const onConfirmDeactivate = () => {
     if (!supplier) return;
@@ -50,6 +52,12 @@ export function SupplierDetailsView() {
 
         {hasAuthority("SUPPLIER_WRITE") && (
           <div className="ml-auto flex gap-2">
+            <button
+              onClick={() => setEditOpen(true)}
+              className="px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-600 hover:bg-gray-100"
+            >
+              Edytuj
+            </button>
             {supplier.active ? (
               <button
                 onClick={() => setConfirmOpen(true)}
@@ -98,6 +106,10 @@ export function SupplierDetailsView() {
       </section>
 
       {hasAuthority("PURCHASE_READ") && <SupplierOrderHistory supplierId={supplier.id} />}
+
+      {editOpen && (
+        <EditSupplierModal supplier={supplier} onClose={() => setEditOpen(false)} />
+      )}
 
       <ConfirmModal
         open={confirmOpen}

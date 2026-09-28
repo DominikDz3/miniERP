@@ -132,6 +132,37 @@ class SupplierServiceTest {
         assertThat(res.name()).isEqualTo("Nowa");
     }
 
+    @Test
+    void update_skipsNipCheckWhenNipUnchanged() {
+        // given
+        Supplier existing = new Supplier();
+        existing.setId(7L);
+        existing.setNip("1234567890");
+        when(suppliers.findById(7L)).thenReturn(Optional.of(existing));
+        // when
+        service.update(7L, request());
+        // then
+        verify(suppliers, never()).existsByNip(any());
+    }
+
+    @Test
+    void update_throwsWhenNewNipBelongsToAnotherSupplier() {
+        // given
+        Supplier existing = new Supplier();
+        existing.setId(7L);
+        existing.setNip("1234567890");
+        when(suppliers.findById(7L)).thenReturn(Optional.of(existing));
+        when(suppliers.existsByNip("9999999999")).thenReturn(true);
+        SupplierRequest req = new SupplierRequest(
+                "Hurtownia XYZ", "9999999999", "biuro@xyz.pl", "500600700",
+                "ul. Handlowa 3", "Rzeszów", "35-001", null);
+        // when / then
+        assertThatThrownBy(() -> service.update(7L, req))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("9999999999");
+        assertThat(existing.getNip()).isEqualTo("1234567890");
+    }
+
     // deactivate
 
     @Test
