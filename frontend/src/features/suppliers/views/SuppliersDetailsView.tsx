@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import { useSupplier, useDeactivateSupplier, useActivateSupplier } from "@/features/suppliers/hooks/useSuppliers";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { ConfirmModal } from "@/shared/components/ConfirmModal";
+import { SupplierOrderHistory } from "@/features/suppliers/components/SupplierOrderHistory";
 
 const cardCls = "bg-white rounded-xl shadow-sm border border-gray-100 p-5";
 const sectionTitleCls = "text-sm font-medium text-gray-500 mb-3";
@@ -95,6 +96,8 @@ export function SupplierDetailsView() {
           <dd className="text-gray-800">{new Date(supplier.createdAt).toLocaleString("pl-PL")}</dd>
         </dl>
       </section>
+
+      {hasAuthority("PURCHASE_READ") && <SupplierOrderHistory supplierId={supplier.id} />}
 
       <ConfirmModal
         open={confirmOpen}

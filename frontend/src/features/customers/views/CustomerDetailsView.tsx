@@ -6,13 +6,16 @@ import {
   useSetDefaultPayer, useSetDefaultReceiver,
 } from "../hooks/useCustomers";
 import type { AddressResponse } from "../types/customer";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { ConfirmModal } from "@/shared/components/ConfirmModal";
 import { AddAddressModal } from "@/features/customers/components/AddAddressModal";
+import { CustomerOrderHistory } from "@/features/customers/components/CustomerOrderHistory";
 
 export function CustomerDetailsView() {
   const { id } = useParams();
   const customerId = id ? Number(id) : null;
   const navigate = useNavigate();
+  const { hasAuthority } = useAuth();
 
   const { data: customer, isLoading, isError } = useCustomer(customerId);
   const { data: payers } = usePayerAddresses(customerId);
@@ -98,6 +101,8 @@ export function CustomerDetailsView() {
           onSetDefault={(addressId) => setDefaultReceiver.mutate({ id: customer.id, addressId })}
         />
       </div>
+
+      {hasAuthority("SALES_READ") && <CustomerOrderHistory customerId={customer.id} />}
 
       {addrModal && (
         <AddAddressModal open customerId={customer.id} type={addrModal} onClose={() => setAddrModal(null)} />
