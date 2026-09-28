@@ -11,9 +11,10 @@ public interface PayerAddressMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "customerId", ignore = true)
+    @Mapping(target = "active", ignore = true)
     PayerAddress toEntity(AddressRequest req);
 
-    @Mapping(target = "phone", ignore = true)          // payer has no phone
+    @Mapping(target = "phone", ignore = true)
     @Mapping(target = "isDefault", source = "isDefault")
     AddressResponse toResponse(PayerAddress a, boolean isDefault);
 }

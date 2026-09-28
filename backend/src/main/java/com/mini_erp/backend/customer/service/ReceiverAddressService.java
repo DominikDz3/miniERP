@@ -31,7 +31,7 @@ public class ReceiverAddressService {
     @Transactional(readOnly = true)
     public List<AddressResponse> list(Long customerId) {
         Customer c = customer(customerId);
-        return receivers.findByCustomerIdOrderById(customerId).stream()
+        return receivers.findByCustomerIdAndActiveTrueOrderById(customerId).stream()
                 .map(a -> mapper.toResponse(a, a.getId().equals(c.getDefaultReceiverId())))
                 .toList();
     }
@@ -58,22 +58,34 @@ public class ReceiverAddressService {
     }
 
     @Transactional
+    public AddressResponse update(Long customerId, Long addressId, AddressRequest req) {
+        Customer c = customer(customerId);
+        ReceiverAddress old = findActiveOwned(customerId, addressId);
+
+        ReceiverAddress created = add(customerId, req);
+        old.setActive(false);
+        receivers.save(old);
+
+        if (old.getId().equals(c.getDefaultReceiverId())) {
+            c.setDefaultReceiverId(created.getId());
+            customers.save(c);
+        }
+        return mapper.toResponse(created, created.getId().equals(c.getDefaultReceiverId()));
+    }
+
+    @Transactional
     public void remove(Long customerId, Long addressId) {
         Customer c = customer(customerId);
-        ReceiverAddress a = receivers.findById(addressId)
-                .filter(r -> r.getCustomerId().equals(customerId))
-                .orElseThrow(() -> new NotFoundException("Nie znaleziono adresu odbiorcy: " + addressId));
-        if (receivers.countByCustomerId(customerId) == 1) {
+        ReceiverAddress a = findActiveOwned(customerId, addressId);
+        if (receivers.countByCustomerIdAndActiveTrue(customerId) == 1) {
             throw new IllegalArgumentException("Klient musi mieć co najmniej jeden adres odbiorcy");
         }
-        boolean wasDefault = a.getId().equals(c.getDefaultReceiverId());
-        if (wasDefault) {
-            c.setDefaultReceiverId(null);
-            customers.saveAndFlush(c);
-        }
-        receivers.delete(a);
-        if (wasDefault) {
-            c.setDefaultReceiverId(receivers.findByCustomerIdOrderById(customerId).get(0).getId());
+        a.setActive(false);
+        receivers.save(a);
+
+        if (a.getId().equals(c.getDefaultReceiverId())) {
+            ReceiverAddress next = receivers.findByCustomerIdAndActiveTrueOrderById(customerId).get(0);
+            c.setDefaultReceiverId(next.getId());
             customers.save(c);
         }
     }
@@ -81,11 +93,16 @@ public class ReceiverAddressService {
     @Transactional
     public void setDefault(Long customerId, Long addressId) {
         Customer c = customer(customerId);
-        boolean owns = receivers.findById(addressId)
-                .map(r -> r.getCustomerId().equals(customerId)).orElse(false);
-        if (!owns) throw new NotFoundException("Adres odbiorcy nie należy do klienta: " + addressId);
+        findActiveOwned(customerId, addressId);
         c.setDefaultReceiverId(addressId);
         customers.save(c);
+    }
+
+    private ReceiverAddress findActiveOwned(Long customerId, Long addressId) {
+        return receivers.findById(addressId)
+                .filter(r -> r.getCustomerId().equals(customerId))
+                .filter(r -> r.isActive())
+                .orElseThrow(() -> new NotFoundException("Nie znaleziono adresu odbiorcy: " + addressId));
     }
 
     private void requirePhone(AddressRequest req) {

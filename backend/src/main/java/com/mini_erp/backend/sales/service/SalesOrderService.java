@@ -106,6 +106,9 @@ public class SalesOrderService {
         if (!address.getCustomerId().equals(customer.getId())) {
             throw new IllegalArgumentException("Adres nie należy do wskazanego klienta");
         }
+        if (!address.isActive()) {
+            throw new IllegalArgumentException("Wybrany adres dostawy jest nieaktywny");
+        }
 
         SalesOrder order = new SalesOrder();
         order.setCustomer(customer);

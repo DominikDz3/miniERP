@@ -3,6 +3,7 @@ package com.mini_erp.backend.shared.mappers;
 import com.mini_erp.backend.customer.domain.Customer;
 import com.mini_erp.backend.customer.web.dto.CustomerRequest;
 import com.mini_erp.backend.customer.web.dto.CustomerResponse;
+import com.mini_erp.backend.customer.web.dto.CustomerUpdateRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -22,7 +23,7 @@ public interface CustomerMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "defaultPayerId", ignore = true)
     @Mapping(target = "defaultReceiverId", ignore = true)
-    void updateScalars(CustomerRequest req, @MappingTarget Customer c);
+    void updateScalars(CustomerUpdateRequest req, @MappingTarget Customer c);
 
     CustomerResponse toResponse(Customer c);
 }

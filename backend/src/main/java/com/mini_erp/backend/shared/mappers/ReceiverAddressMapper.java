@@ -11,6 +11,7 @@ public interface ReceiverAddressMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "customerId", ignore = true)
+    @Mapping(target = "active", ignore = true)
     ReceiverAddress toEntity(AddressRequest req);
 
     @Mapping(target = "isDefault", source = "isDefault")

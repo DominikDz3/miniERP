@@ -4,44 +4,72 @@ import { useState } from "react";
 import { Modal } from "@/shared/components/Modal";
 import { labelCls, inputCls } from "@/shared/components/formStyles";
 import { addressFormSchema, type AddressFormValues } from "@/features/customers/schemas/addressForm";
-import { useAddPayer, useAddReceiver } from "@/features/customers/hooks/useCustomers";
+import {
+  useAddPayer, useAddReceiver, useUpdatePayer, useUpdateReceiver,
+} from "@/features/customers/hooks/useCustomers";
 import { ApiError } from "@/shared/services/apiClient";
-import type { AddressRequest } from "@/features/customers/types/customer";
+import type { AddressRequest, AddressResponse } from "@/features/customers/types/customer";
 
 interface Props {
-  open: boolean;
   customerId: number;
   type: "payer" | "receiver";
+  address: AddressResponse | null;
   onClose: () => void;
 }
 
-export function AddAddressModal({ open, customerId, type, onClose }: Props) {
+export function AddressModal({ customerId, type, address, onClose }: Props) {
   const isReceiver = type === "receiver";
+  const isEdit = address !== null;
+
   const addPayer = useAddPayer();
   const addReceiver = useAddReceiver();
+  const updatePayer = useUpdatePayer();
+  const updateReceiver = useUpdateReceiver();
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<AddressFormValues>({
+  let defaultValues: AddressFormValues | undefined = undefined;
+  if (address) {
+    defaultValues = {
+      street: address.street,
+      city: address.city,
+      postalCode: address.postalCode,
+      country: address.country,
+      phone: address.phone ?? "",
+    };
+  }
+
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<AddressFormValues>({
     resolver: zodResolver(addressFormSchema(isReceiver)),
+    defaultValues,
     mode: "onTouched",
   });
 
-  const close = () => { reset(); setServerError(null); onClose(); };
+  let title = "Nowy adres płatnika";
+  if (isEdit && isReceiver) title = "Edycja adresu odbiorcy";
+  if (isEdit && !isReceiver) title = "Edycja adresu płatnika";
+  if (!isEdit && isReceiver) title = "Nowy adres odbiorcy";
 
   const onSubmit = async (values: AddressFormValues) => {
     setServerError(null);
     const body: AddressRequest = { ...values };
     try {
-      if (isReceiver) await addReceiver.mutateAsync({ id: customerId, body });
-      else await addPayer.mutateAsync({ id: customerId, body });
-      close();
+      if (address && isReceiver) {
+        await updateReceiver.mutateAsync({ id: customerId, addressId: address.id, body });
+      } else if (address) {
+        await updatePayer.mutateAsync({ id: customerId, addressId: address.id, body });
+      } else if (isReceiver) {
+        await addReceiver.mutateAsync({ id: customerId, body });
+      } else {
+        await addPayer.mutateAsync({ id: customerId, body });
+      }
+      onClose();
     } catch (err) {
       setServerError(err instanceof ApiError ? err.detail : "Błąd zapisu adresu");
     }
   };
 
   return (
-    <Modal open={open} title={isReceiver ? "Nowy adres odbiorcy" : "Nowy adres płatnika"} onClose={close}>
+    <Modal open title={title} onClose={onClose}>
       {serverError && (
         <div className="mb-4 flex gap-2 items-start bg-red-50 border border-red-200 rounded-lg px-3 py-2">
           <span className="text-red-500">⚠</span>
@@ -78,11 +106,11 @@ export function AddAddressModal({ open, customerId, type, onClose }: Props) {
           </div>
         )}
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={close}
+          <button type="button" onClick={onClose}
             className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">Anuluj</button>
           <button type="submit" disabled={isSubmitting}
             className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer">
-            {isSubmitting ? "Zapisywanie…" : "Dodaj"}
+            {isSubmitting ? "Zapisywanie…" : isEdit ? "Zapisz zmiany" : "Dodaj"}
           </button>
         </div>
       </form>

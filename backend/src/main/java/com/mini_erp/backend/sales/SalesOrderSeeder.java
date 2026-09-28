@@ -63,7 +63,7 @@ public class SalesOrderSeeder implements ApplicationRunner {
         for (int i = 0; i < ORDER_COUNT; i++) {
             Customer customer = allCustomers.get(faker.number().numberBetween(0, allCustomers.size()));
 
-            List<ReceiverAddress> addrs = receiverAddresses.findByCustomerIdOrderById(customer.getId());
+            List<ReceiverAddress> addrs = receiverAddresses.findByCustomerIdAndActiveTrueOrderById(customer.getId());
             if (addrs.isEmpty()) continue;
             ReceiverAddress addr = addrs.get(faker.number().numberBetween(0, addrs.size()));
 

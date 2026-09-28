@@ -31,4 +31,7 @@ public class ReceiverAddress {
 
     @Column(nullable = false, length = 30)
     private String phone;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }
