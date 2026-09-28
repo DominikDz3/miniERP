@@ -52,7 +52,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
-    public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
+    public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductUpdateRequest request) {
         return productService.update(id, request);
     }
 

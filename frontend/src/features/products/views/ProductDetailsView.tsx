@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useProduct, useProductPriceHistory, useDeactivateProduct, useActivateProduct } from "../hooks/useProducts";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { ConfirmModal } from "@/shared/components/ConfirmModal";
+import { EditProductModal } from "@/features/products/components/EditProductModal";
 import { VAT_LABEL } from "../types/catalog";
 
 const cardCls = "bg-white rounded-xl shadow-sm border border-gray-100 p-5";
@@ -20,6 +21,7 @@ export function ProductDetailsView() {
   const activate = useActivateProduct();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const onConfirmDeactivate = () => {
     if (!product) return;
@@ -51,6 +53,12 @@ export function ProductDetailsView() {
 
         {hasAuthority("PRODUCT_WRITE") && (
           <div className="ml-auto flex gap-2">
+            <button
+              onClick={() => setEditOpen(true)}
+              className="px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-600 hover:bg-gray-100"
+            >
+              Edytuj
+            </button>
             {product.active ? (
               <button
                 onClick={() => setConfirmOpen(true)}
@@ -136,6 +144,10 @@ export function ProductDetailsView() {
           </section>
         )}
       </div>
+
+      {editOpen && (
+        <EditProductModal product={product} onClose={() => setEditOpen(false)} />
+      )}
 
       <ConfirmModal
         open={confirmOpen}

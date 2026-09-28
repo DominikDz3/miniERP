@@ -4,7 +4,7 @@ import { useSupplier, useDeactivateSupplier, useActivateSupplier } from "@/featu
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { ConfirmModal } from "@/shared/components/ConfirmModal";
 import { SupplierOrderHistory } from "@/features/suppliers/components/SupplierOrderHistory";
-import { EditSupplierModal } from "../components/EditSuppliermodal";
+import { EditSupplierModal } from "../components/EditSupplierModal";
 
 const cardCls = "bg-white rounded-xl shadow-sm border border-gray-100 p-5";
 const sectionTitleCls = "text-sm font-medium text-gray-500 mb-3";
